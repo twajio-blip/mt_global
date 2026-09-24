@@ -18,9 +18,9 @@
     <header class="w-full fixed top-0 left-0 right-0 z-50 flex flex-col font-sans">
         
         {{-- 1. Top Contact Bar --}}
-        <div class="hidden sm:block bg-brand-charcoal text-white transition-all duration-500 ease-in-out overflow-hidden"
+        <div class="hidden sm:block bg-background text-white transition-all duration-500 ease-in-out overflow-hidden"
             :class="isScrolled ? 'h-0' : 'h-10'">
-            <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between text-sm">
+            <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between text-sm bg-background">
                 <div class="flex items-center space-x-6">
                     <a href="mailto:{{ $email }}" class="flex items-center gap-2 whitespace-nowrap hover:text-brand-red transition-colors">
                         <i class="fa-solid fa-envelope text-brand-red"></i>
@@ -39,7 +39,7 @@
         </div>
 
         {{-- 2. Main Navigation --}}
-        <div class="bg-white shadow-md transition-all duration-500 ease-in-out" 
+        <div class="bg-background shadow-md transition-all duration-500 ease-in-out" 
              :class="isScrolled ? 'h-16' : 'h-20 lg:h-24'">
             <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-full">
                 

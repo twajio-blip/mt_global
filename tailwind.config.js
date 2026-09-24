@@ -26,6 +26,7 @@ export default {
     theme: {
         extend: {
             colors: {
+                background: 'var(--background)',
                 brand: {
                     red: 'var(--brand-red)',
                     redHover: 'var(--brand-red-hover)',
