@@ -1,0 +1,37 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+/node_modules/
+/vendor/
+
+# Laravel
+/storage/*.key
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Build files
+/public/build/
+/public/hot
+
+# IDE
+/.vscode/
+/.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+temp_git_log.txt
+
+# Unnecessary extracted ZIP folder
+/MT Global/
+
+/public/images/

@@ -1,0 +1,588 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "line-awesome/dist/line-awesome/css/line-awesome.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Global Fonts */
+  --font-sans: "Outfit", sans-serif;
+  --font-heading: "Outfit", sans-serif;
+
+  /* Match Blade/AIZ responsive breakpoints */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1500px;
+  --breakpoint-xxl: 1500px;
+  /* Premium section gap variable matching Blade mt-3 mt-md-4 / mb-3 mb-md-4 */
+  --spacing-section-gap: clamp(0.75rem, 2vw, 1.5rem);
+  --spacing-section-gap-y: clamp(0.75rem, 2vw, 1.5rem);
+
+  /* Theme mappings for customer panel (linked to variables in customer.css) */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-foreground: var(--foreground);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inverse: var(--text-inverse);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-success: var(--success);
+  --color-success-hover: var(--success-hover);
+  --color-confirm-hover: var(--confirm-hover);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: #ffffff;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-light: var(--light);
+  --color-dark: var(--dark);
+  --color-soft-dark: var(--soft-dark);
+  --color-gray: var(--gray);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-btn-hover: var(--btn-hover);
+  --color-soft-secondary-background: var(--soft-secondary-background);
+  --color-tag-text-color: var(--tag-text-color);
+  --color-soft-info: var(--soft-info);
+
+  /* Spacing scale — generates mb-small, mb-medium, mb-large, mb-huge, p-huge, etc. */
+  --spacing-small: 0.25rem;
+  /* 4px */
+  --spacing-medium: 0.5rem;
+  /* 8px */
+  --spacing-large: 0.75rem;
+  /* 12px */
+  --spacing-huge: 1rem;
+  /* 16px */
+  --spacing-xhuge: 1.5rem;
+  /* 24px */
+
+  /* Custom Dropdown Animation */
+  --animate-dropdown-show: dropdownShow 0.3s ease-out forwards;
+
+  @keyframes dropdownShow {
+    from {
+      opacity: 0;
+      transform: translateY(200px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+:root {
+/* Surfaces */
+
+--background: oklch(1 0 0); /* #FFFFFF */
+--soft-secondary-background: oklch(0.5048 0.1425 143.1 / 14.9%); /* #25782526 */
+--surface: oklch(1 0 0); /* #FFFFFF */
+--surface-muted: oklch(0.994 0.018 90.155); /* #FFFDF0 */
+
+/* Brand */
+
+--primary: oklch(0.569 0.242 27.247); /* #E3000B */
+--base-color: var(--primary);
+--primary-soft: oklch(0.916 0.042 21.054); /* #FED9D7 */
+--primary-foreground: oklch(1 0 0); /* #FFFFFF */
+--btn-hover: oklch(0.4675 0.1639 256.7); /* #0056b3 */
+
+/* Text */
+
+--foreground: oklch(0.2284 0.0251 284.24); /* #1B1B28 */
+--text-secondary: oklch(0.44 0.03 260); /* #495363 */
+--text-muted: oklch(0.708 0.02 260); /* #9AA1AE */
+--text-disabled: oklch(0.86 0.01 260); /* #CDD1D8 */
+--text-inverse: oklch(1 0 0); /* #FFFFFF */
+
+/* States */
+
+--danger: oklch(0.6474 0.2027 13.17); /* #EF486A */
+--danger-hover: oklch(0.5401 0.1978 22.84); /* #C82333 */
+--success: oklch(0.7202 0.1184 134.32); /* #85B567 */
+--success-hover: oklch(0.5515 0.1489 146.79); /* #218838 */
+--confirm-hover: oklch(0.7738 0.2348 138.79); /* #57D61C */
+--warning: oklch(0.789 0.184 75.342); /* #FDA500 */
+--info: oklch(0.548 0.142 240.231); /* #0079BB */
+--soft-info: oklch(0.7447 0.1386 228.43 / 14.9%); /* #25bcf126 */
+
+/* Shadcn Compatibility */
+
+--card: oklch(1 0 0); /* #FFFFFF */
+--card-foreground: oklch(0.24 0.02 260); /* #1A2029 */
+--popover: oklch(1 0 0); /* #FFFFFF */
+--popover-foreground: oklch(0.24 0.02 260); /* #1A2029 */
+
+--secondary: oklch(0.916 0.042 21.054); /* #FED9D7 */
+--secondary-foreground: #e3000b; /* #E3000B */
+
+--muted: oklch(0.985 0.004 247.882); /* #F8FAFD */
+--muted-foreground: oklch(0.7762 0.0141 286.07); /* #6F747B */
+
+--accent: oklch(0.967 0.007 247.9); /* #F1F5F9 */
+--accent-foreground: oklch(0.205 0.005 264.4); /* #161719 */
+
+--border: oklch(0.9057 0.0095 286.21); /* #E3E5E8 */
+--input: oklch(0.922 0.012 256.4); /* #E0E6ED */
+--ring: oklch(0.569 0.242 27.247); /* #E3000B */
+
+--light: oklch(0.9702 0 0); /* #F5F5F5 */
+--dark: oklch(0.2852 0.0182 285.19); /* #292933 */
+--soft-dark: oklch(0.2284 0.0251 284.24); /* #1B1B28 */
+--gray: oklch(0.6988 0.013 286.06); /* #9D9DA6 */
+--tag-text-color: oklch(0.2621 0.0095 248.19); /* #212925 */
+
+/* Sidebar Variables */
+
+--sidebar: oklch(1 0 0); /* #FFFFFF */
+--sidebar-foreground: oklch(0.28 0.02 260); /* #232933 */
+--sidebar-primary: oklch(0.569 0.242 27.247); /* #E3000B */
+--sidebar-primary-foreground: oklch(1 0 0); /* #FFFFFF */
+--sidebar-accent: oklch(0.952 0.019 91.5); /* #F4EFE1 */
+--sidebar-accent-foreground: oklch(0.31 0.03 82.4); /* #382F1F */
+--sidebar-border: oklch(0.922 0.004 256.4); /* #E3E5E8 */
+--sidebar-ring: oklch(0.569 0.242 27.247); /* #E3000B */
+
+/* Chart Variables */
+
+--chart-1: oklch(0.645 0.246 16.439); /* #FF2056 */
+--chart-2: oklch(0.581 0.227 175.324); /* #00A174 */
+--chart-3: oklch(0.346 0.098 214.334); /* #004558 */
+--chart-4: oklch(0.773 0.137 80.649); /* #E2AB3E */
+--chart-5: oklch(0.76 0.188 70.48); /* #FA9700 */
+
+--radius: 0.625rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  h1 { font-size: 2.5rem;  line-height: 1.2; }
+  h2 { font-size: 2rem;    line-height: 1.2; }
+  h3 { font-size: 1.75rem; line-height: 1.2; }
+  h4 { font-size: 1.5rem;  line-height: 1.2; }
+  h5 { font-size: 1.25rem; line-height: 1.2; }
+  h6 { font-size: 1rem;    line-height: 1.2; }
+   p { font-size: 1.125rem;}
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Hide default browser spin buttons/arrows for number inputs */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+.cn-toast {
+  border-radius: 6px !important;
+  border: 1px solid #dbe4f0 !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08) !important;
+  padding: 12px 12px 12px 10px !important;
+}
+
+.cn-toast-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+}
+
+.cn-toast-description {
+  font-size: 12px !important;
+  color: #475569 !important;
+}
+
+.cn-toast-close {
+  border: 1px solid #e5e7eb !important;
+  background: #f8fafc !important;
+  color: #64748b !important;
+}
+
+.container {
+  @apply w-full mx-auto px-3.75 sm:max-w-135 md:max-w-180 lg:max-w-240 xl:max-w-285 2xl:max-w-350;
+}
+
+.flash-deal-bg-pulse {
+  animation: flashDealBgPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes flashDealBgPulse {
+  0%,
+  16% {
+    background-color: #e62e2e;
+  }
+
+  45%,
+  62% {
+    background-color: #ff8a00;
+  }
+
+  88%,
+  100% {
+    background-color: #e62e2e;
+  }
+}
+
+.discount-badge {
+  background-color: #fd7e14;
+}
+[data-sonner-toast][data-type='success'] {
+  border-left: 4px solid #22c55e !important;
+}
+
+[data-sonner-toast][data-type='error'] {
+  border-left: 4px solid #ef4444 !important;
+}
+
+[data-sonner-toast][data-type='warning'] {
+  border-left: 4px solid #f59e0b !important;
+}
+
+[data-sonner-toast][data-type='info'] {
+  border-left: 4px solid #0ea5e9 !important;
+}
+
+/*
+ * cms-content & description — matches Bootstrap 4 base typography used by the blade.
+ * The content HTML is editor-generated (TinyMCE/CKEditor) and rendered
+ * raw in the blade with no extra wrapper class — so Bootstrap's body
+ * defaults apply. We replicate those here.
+ */
+.content, .description {
+  @apply text-[13px] leading-[1.6] text-soft-dark dark:text-slate-300;
+}
+
+.content h1 {
+  @apply mb-2 font-medium text-[40px] leading-[1.2];
+}
+
+.description h1 {
+  @apply mb-2 font-medium text-[40px] leading-[1.2];
+}
+
+.content h2 {
+  @apply mb-2 font-medium text-[32px] leading-[1.2];
+}
+
+.description h2 {
+  @apply mb-2 font-medium text-[32px] leading-[1.2];
+}
+
+.content h3 {
+  @apply mb-2 font-medium text-[28px] leading-[1.2];
+}
+
+.description h3 {
+  @apply mb-2 font-medium text-[28px] leading-[1.2];
+}
+
+.content h4 {
+  @apply mb-2 font-medium text-[24px] leading-[1.2];
+}
+
+.description h4 {
+  @apply mb-2 font-medium text-[24px] leading-[1.2];
+}
+
+.content h5 {
+  @apply mb-2 font-medium text-[20px] leading-[1.2] text-foreground;
+}
+
+.description h5 {
+  @apply mb-2 font-medium text-[20px] leading-[1.2] text-foreground;
+}
+
+.content h6 {
+  @apply mb-2 font-medium text-[16px] leading-[1.2] text-foreground;
+}
+
+.description h6 {
+  @apply mb-2 font-medium text-[16px] leading-[1.2] text-foreground;
+}
+
+.content h1 p,
+.content h2 p,
+.content h3 p,
+.content h4 p,
+.content h5 p,
+.content h6 p {
+  @apply mt-0 mb-huge;
+  font: inherit;
+  color: inherit;
+}
+
+.content h1 p,
+.content h2 p,
+.content h3 p,
+.content h4 p,
+.content h5 p,
+.content h6 p {
+  @apply mt-0 mb-huge;
+  font: inherit;
+  color: inherit;
+}
+
+.description h1 p,
+.description h2 p,
+.description h3 p,
+.description h4 p,
+.description h5 p,
+.description h6 p {
+  @apply mt-0 mb-huge;
+  font: inherit;
+  color: inherit;
+}
+
+.description p {
+  @apply mb-4 text-[13px] leading-[1.6];
+}
+
+.content p {
+  @apply mb-4 text-[13px] leading-normal;
+}
+
+.content ul, .description ul,
+.content ol, .description ol {
+  @apply mb-4 pl-10;
+}
+
+.content ul {
+  @apply list-none;
+}
+
+.description ul {
+  @apply list-disc;
+}
+
+.content ol, .description ol {
+  @apply list-decimal;
+}
+
+.content li, .description li {
+  @apply mb-1;
+}
+
+.content strong, .description strong,
+.content b, .description b {
+  @apply font-bold;
+}
+
+.content em, .description em,
+.content i, .description i {
+  @apply italic;
+}
+
+.content a, .description a {
+  @apply text-[#007bff] no-underline;
+}
+
+.content a:hover, .description a:hover {
+  @apply underline;
+}
+
+.content blockquote {
+  @apply mb-huge;
+}
+
+.description blockquote p {
+  @apply m-0 mb-4;
+}
+
+.content .blockquote p {
+  @apply mb-4 text-[20px];
+}
+
+.content .blockquote {
+  @apply mb-4 text-[20px];
+}
+
+.description .blockquote p {
+  @apply mb-4 text-[20px];
+}
+
+.content .blockquote > :last-child {
+  @apply mb-0;
+}
+
+.description .blockquote > :last-child {
+  @apply mb-0;
+}
+
+.content .blockquote-footer {
+  @apply -mt-4 mb-4 text-[0.875em] text-[#6c757d];
+}
+
+.description .blockquote-footer {
+  @apply -mt-4 mb-4 text-[0.875em] text-[#6c757d];
+}
+
+.content .blockquote-footer::before {
+  content: '— ';
+}
+
+.description .blockquote-footer::before {
+  content: '— ';
+}
+
+.content pre {
+  @apply mb-4 mt-0 block overflow-auto text-[87.5%] leading-[1.5] text-[#212529];
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -ms-overflow-style: scrollbar;
+}
+
+.description pre {
+  @apply mb-4 mt-0 block overflow-auto text-[87.5%] leading-[1.5] text-[#212529];
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -ms-overflow-style: scrollbar;
+}
+
+.content pre code {
+  @apply text-inherit;
+  font-size: inherit;
+  word-break: normal;
+}
+
+.description pre code {
+  @apply text-inherit;
+  font-size: inherit;
+  word-break: normal;
+}
+
+.content table, .description table {
+  @apply mb-4 w-full border-collapse;
+}
+
+.content table th, .description table th,
+.content table td, .description table td {
+  @apply p-3 border border-[#dee2e6] align-top text-[13px] leading-normal;
+}
+
+.content table th, .description table th {
+  @apply bg-[#f8f9fa] font-bold;
+}
+
+.content img, .description img {
+  @apply max-w-full h-auto;
+}
+
+.animate-underline-primary {
+  position: relative;
+}
+
+.animate-underline-primary::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--primary, #d61c1c);
+  transform-origin: right;
+  transform: scaleX(0);
+  transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.animate-underline-primary:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.storefront-view-link {
+  position: relative;
+  display: inline-block;
+  color: var(--storefront-view-link-color, var(--primary));
+  font-size: 13px;
+  font-weight: 700;
+  transition: color 0.5s ease-out;
+}
+
+@media (min-width: 768px) {
+  .storefront-view-link {
+    font-size: 14px;
+  }
+}
+
+.storefront-view-link::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  border-radius: 2px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s ease-out;
+}
+
+.storefront-view-link:hover {
+  color: var(--storefront-view-link-hover, var(--btn-hover));
+}
+
+.storefront-view-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.content hr, .description hr {
+  @apply my-4 border-[#dee2e6] border-0 border-t;
+}
