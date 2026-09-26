@@ -1,138 +1,115 @@
 @props(['data' => []])
 
 @php
-    // Extract text content from Group 0 safely with fallback defaults
-    $textContent = $data[0][0] ?? [];
-    $title = $textContent['title'] ?? 'Precision Vertical Transport';
-    $subtitle = $textContent['subtitle'] ?? 'Architecture in motion.';
-    $description = $textContent['description'] ?? '';
-    $btnLink = $textContent['btn_link'] ?? 'contact';
-    $btnText = $textContent['btn_text'] ?? 'Request a quote';
+    $jobCountries = \App\Models\JobCountry::withCount(['jobs' => fn ($query) => $query->where('is_active', true)])
+        ->where('is_active', true)
+        ->orderBy('name')
+        ->get();
 
-    // Extract dynamic backend video if present, otherwise fall back to static asset
-    $backendVideo = $data[1][0]['video'] ?? null;
-    $videoSrc = $backendVideo ? asset('images/' . $backendVideo) : asset('images/0514 (1).mp4'); 
+    $jobDesignations = \App\Models\JobDesignation::where('is_active', true)
+        ->orderBy('name')
+        ->get();
+
+    $openJobsCount = \App\Models\CountryJob::where('is_active', true)->count();
+    $vacanciesCount = \App\Models\CountryJob::where('is_active', true)->sum('vacancies');
+    $countryCount = $jobCountries->count();
+    $popularJobs = \App\Models\CountryJob::with(['country', 'jobDesignation'])
+        ->where('is_active', true)
+        ->latest()
+        ->limit(4)
+        ->get();
 @endphp
 
-<section
-    id="hero-section"
-    class="w-full bg-[#F8F6F2] overflow-hidden"
->
-    <div class="max-w-7xl mx-auto px-0 md:pl-4 xl:px-4">
-        <div class="relative flex flex-col md:flex-row items-center min-h-screen lg:h-screen gap-0">
+<section class="relative bg-background overflow-hidden" aria-labelledby="hero-title">
+    <div class="hidden lg:block right-0 absolute inset-y-0 w-[42%]">
+        <img
+            src="{{ asset('defualt/placeholder.png') }}"
+            alt="Skilled construction workers at an overseas project site"
+            class="w-full h-full object-cover"
+        >
+    </div>
 
-            {{-- TEXT (40%) --}}
-            <div class="w-full md:basis-[40%] z-10 py-16 md:py-0 px-4 md:pr-8 md:pl-0">
+    <div class="relative container">
+        <div class="py-12 sm:py-16 lg:py-24 lg:pr-12 lg:w-[62%]">
+            <p class="flex items-center gap-2 font-medium text-[#B3C6E4] text-sm">
+                <i class="w-4 h-4 text-[#12A06A] fa-solid fa-shield-halved"></i>
+                RL-123456 Government Approved Recruiting Agencys
+            </p>
 
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="text-brand-red font-bold uppercase tracking-widest text-size-sub-header">
-                        {{ $title }}
-                    </span>
-                </div>
-
-                <h1
-                    class="text-size-title font-light tracking-tight leading-[1.1] mb-6 text-neutral-900"
-                    data-aos="fade-up"
-                    data-aos-delay="200"
-                >
-                    @if(str_contains($subtitle, 'in motion.'))
-                        {!! str_replace(
-                            'in motion.',
-                            '<span class="italic font-normal text-neutral-600">in motion.</span>',
-                            e($subtitle)
-                        ) !!}
-                    @else
-                        {{ $subtitle }}
-                    @endif
-                </h1>
-
-                <p
-                    class="text-size-body text-justify text-neutral-600 mb-10 font-light leading-relaxed"
-                    data-aos="fade-up"
-                    data-aos-delay="300"
-                >
-                    {{ $description }}
-                </p>
-
-                <div
-                    class="flex justify-start"
-                    data-aos="fade-up"
-                    data-aos-delay="500"
-                >
-                    <a
-                        href="/{{ ltrim($btnLink, '/') }}"
-                        class="inline-flex items-center px-4 lg:px-8 py-4 text-size-body bg-brand-charcoal text-white rounded-lg font-bold hover:bg-brand-red transition-all duration-300 shadow-xl group"
-                    >
-                        {{ $btnText }}
-                        <i class="fa-solid fa-arrow-right text-size-sub-header ml-2 group-hover:translate-x-2 transition-transform"></i>
-                    </a>
-                </div>
-
-            </div>
-
-            {{-- VIDEO (60%) --}}
-            <div class="relative w-full md:basis-[60%] h-[320px] sm:h-[420px] md:h-full bg-neutral-950">
-
-                <video
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                    class="w-full h-full object-cover opacity-85 transition-opacity duration-700"
-                >
-                    <source src="{{ $videoSrc }}" type="video/mp4">
-                </video>
-
-                <div class="absolute inset-0 bg-gradient-to-t from-neutral-950/40 via-transparent to-neutral-950/20 pointer-events-none"></div>
-
-            </div>
-
-            {{-- Divider (Centered perfectly on the 40% line using -translate-x-1/2) --}}
-            <div
-                class="hidden md:block absolute inset-y-0 left-[40%] -translate-x-1/2 pointer-events-none z-20"
-                style="width:2px;"
+            <h1
+                id="hero-title"
+                class="mt-4 font-bold text-[34px] text-white lg:text-[48px] sm:text-5xl leading-[1.1] tracking-tight"
             >
-                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-red/20 to-transparent"></div>
+                Find Your Next Overseas Job Opportunity
+            </h1>
 
-                <div
-                    id="hero-center-beam"
-                    class="absolute flex flex-col items-center"
-                    style="width:2px; top:-200px;"
-                >
-                    <div
-                        style="width:2px;height:180px;background:linear-gradient(to bottom,transparent 0%,rgba(227,0,43,0.3) 40%,rgba(255,58,92,0.8) 80%,#fff 100%);border-radius:9999px;"
-                    ></div>
+            <p class="mt-5 max-w-xl text-[#D9E3F2] text-base sm:text-lg leading-relaxed">
+                Explore verified job opportunities across the Middle East and other international destinations. Find jobs by
+                country and profession and submit your CV directly.
+            </p>
 
-                    <div
-                        style="width:6px;height:18px;background:#fff;border-radius:9999px;box-shadow:0 0 15px 6px rgba(255,58,92,.9),0 0 30px 8px rgba(227,0,43,.6);margin-top:-8px;"
-                    ></div>
-                </div>
+            <div class="bg-white shadow-[0_2px_4px_rgba(15,27,45,0.06),0_12px_28px_rgba(15,27,45,0.10)] mt-8 p-3 sm:p-4 rounded-2xl max-w-2xl">
+                <form action="#" method="GET" class="gap-3 grid md:grid-cols-[1fr_1fr_auto]">
+                    <label class="block">
+                        <span class="flex items-center gap-1.5 mb-1.5 font-semibold text-[#4B5A6E] text-xs uppercase tracking-wide">
+                            <i class="text-[#0E8A5B] fa-solid fa-location-dot"></i>
+                            Country
+                        </span>
+                        <select
+                            name="country"
+                            class="block bg-white px-3.5 border border-[#E2E8F0] focus:border-[#1F4580] rounded-lg outline-none focus:ring-[#D9E3F2] focus:ring-4 w-full h-12 text-[#0F1B2D] text-[15px] transition-[border-color,box-shadow] duration-150 ease-out"
+                        >
+                            <option value="">Any country</option>
+                            @foreach ($jobCountries as $country)
+                                <option value="{{ $country->slug }}">{{ $country->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label class="block">
+                        <span class="flex items-center gap-1.5 mb-1.5 font-semibold text-[#4B5A6E] text-xs uppercase tracking-wide">
+                            <i class="text-[#0E8A5B] fa-solid fa-briefcase"></i>
+                            Profession
+                        </span>
+                        <select
+                            name="designation"
+                            class="block bg-white px-3.5 border border-[#E2E8F0] focus:border-[#1F4580] rounded-lg outline-none focus:ring-[#D9E3F2] focus:ring-4 w-full h-12 text-[#0F1B2D] text-[15px] transition-[border-color,box-shadow] duration-150 ease-out"
+                        >
+                            <option value="">Any profession</option>
+                            @foreach ($jobDesignations as $designation)
+                                <option value="{{ $designation->slug }}">{{ $designation->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <button
+                        type="submit"
+                        class="inline-flex justify-center items-center self-end gap-2 bg-[#0E8A5B] hover:bg-[#0B6F49] px-5 rounded-lg focus-visible:outline-none focus-visible:ring-[#CDEEDD] focus-visible:ring-4 h-12 font-semibold text-[15px] text-white whitespace-nowrap transition-colors duration-150 ease-out"
+                    >
+                        Search jobs
+                        <i class="fa-arrow-right text-sm fa-solid"></i>
+                    </button>
+                </form>
             </div>
-        </div>
 
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-2 mt-5 text-sm">
+                <span class="text-[#B3C6E4]">Popular:</span>
+                @forelse ($popularJobs as $job)
+                    <a href="#" class="px-3 py-1 border border-white/20 hover:border-white/50 rounded-full text-white transition-colors duration-150 ease-out">
+                        {{ $job->jobDesignation?->name ?? $job->designation }} in {{ $job->country?->name }}
+                    </a>
+                @empty
+                    <span class="px-3 py-1 border border-white/20 rounded-full text-white">
+                        Add jobs from admin
+                    </span>
+                @endforelse
+            </div>
+
+            <p class="mt-10 text-[#B3C6E4] text-sm">
+                <span class="font-semibold text-white">{{ number_format($vacanciesCount) }} vacancies</span> across
+                <span class="font-semibold text-white">{{ number_format($openJobsCount) }} open jobs</span> in
+                <span class="font-semibold text-white">{{ number_format($countryCount) }} countries</span>
+            </p>
+        </div>
     </div>
 </section>
-
-@once
-    @push('css')
-        <style>
-            @keyframes horizontal-scan {
-                0% { top: -5px; opacity: 0; }
-                5% { opacity: 0.8; }
-                95% { opacity: 0.8; }
-                100% { top: 100%; opacity: 0; }
-            }
-
-            @keyframes hero-center-scan {
-                0% { top: -200px; opacity: 0; }
-                10% { opacity: 1; }
-                90% { opacity: 1; }
-                100% { top: 100%; opacity: 0; }
-            }
-
-            #hero-center-beam {
-                animation: hero-center-scan 5s linear infinite;
-            }
-        </style>
-    @endpush
-@endonce

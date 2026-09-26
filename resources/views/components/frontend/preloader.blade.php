@@ -1,11 +1,12 @@
 @php
     $general = $general ?? null;
+    $preloaderEnabled = false;
     $preloaderLogo = $general?->logo ?? $general?->fav_icon ?? $general?->footer ?? 'placeholder.png';
     $preloaderLogoUrl = asset('images/' . $preloaderLogo);
     $isHome = request()->is('/');
 @endphp
 
-@if ($isHome)
+@if ($preloaderEnabled && $isHome)
     <style>
         body.preloader-active {
             overflow: hidden;

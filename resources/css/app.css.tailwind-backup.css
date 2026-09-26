@@ -1,0 +1,365 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "tailwind-scrollbar";
+@source "../views/**/*.blade.php";
+@source "../views/**/*.php";
+@source "../js/**/*.js";
+@source "../../storage/framework/views/*.php";
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@theme {
+  /* Global Fonts */
+  --font-sans: "Outfit", sans-serif;
+  --font-heading: "Outfit", sans-serif;
+
+  /* Project breakpoints */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1500px;
+
+  /* Theme mappings for customer panel (linked to variables in customer.css) */
+  --color-background: var(--background);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inverse: var(--text-inverse);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-success: var(--success);
+  --color-success-hover: var(--success-hover);
+  --color-confirm-hover: var(--confirm-hover);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+  --color-light: var(--light);
+  --color-dark: var(--dark);
+  --color-soft-dark: var(--soft-dark);
+  --color-gray: var(--gray);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-tag-text-color: var(--tag-text-color);
+
+  /* Legacy skin color utilities used by the admin panel */
+  --color-skin-hover: rgb(var(--color-text-hover));
+  --color-skin-heading: rgb(var(--color-text-heading));
+  --color-skin-title: rgb(var(--color-text-title));
+  --color-skin-base: rgb(var(--color-text-base));
+  --color-skin-invert: rgb(var(--color-text-invert));
+  --color-skin-muted: rgb(var(--color-text-muted));
+  --color-skin-backend-text-base: rgb(var(--color-backend-text-base));
+  --color-skin-primary: rgb(var(--color-background-primary));
+  --color-skin-secondary: rgb(var(--color-background-secondary));
+  --color-skin-default: rgb(var(--color-background-default));
+  --color-skin-content: rgb(var(--color-background-content));
+  --color-skin-backend-primary: rgb(var(--color-backend-background-primary));
+  --color-skin-backend-secondary: rgb(var(--color-backend-background-secondary));
+  --color-skin-backend-accent: rgb(var(--color-backend-background-accent));
+
+
+  /* Spacing scale — generates mb-small, mb-medium, mb-large, mb-huge, p-huge, etc. */
+  --spacing-xsmall: 0.25rem;
+  /* 4px */
+  --spacing-small: 0.5rem;
+   /* 8px */
+  --spacing-small: 0.725rem;
+  /* 12px */
+  --spacing-large: 1rem;
+  /* 16px */
+  --spacing-huge: 1.25rem;
+  /* 20px */
+  --spacing-xhuge: 1.5rem;
+  /* 24px */
+  --spacing-2xhuge: 1.725rem;
+  /* 28px */
+  --spacing-2xhuge: 2rem;
+  /* 32px */
+
+}
+
+@utility max-w-* {
+  max-width: calc(--value(integer) * 0.25rem);
+}
+
+@layer base {
+  :root {
+    /* Border Colors */
+    --default-border: 234, 234, 234;
+    --highlight-border: 254, 221, 0;
+    /* Text Colors */
+    --color-text-hover: 254, 221, 0;
+    --color-text-heading: 9, 104, 173;
+    --color-text-title: 18, 17, 41;
+    --color-text-base: 255, 255, 255;
+    --color-text-muted: 79, 79, 79;
+    --color-text-invert: 17, 16, 19;
+
+    /* Background Colors */
+    --color-background-primary: 20, 20, 20;
+    --color-background-secondary: 254, 221, 0;
+    --color-background-default: 238, 238, 238;
+    --color-background-content: 255, 255, 255;
+
+    --color-backend-background-primary: 21, 21, 21;
+    --color-backend-background-secondary: 37, 37, 37;
+    --color-backend-background-accent: 254, 221, 0;
+    --color-backend-text-base: 234, 234, 234;
+
+    /* Brand Colors */
+    --brand-red: #CC0000;
+    --brand-red-hover: #A30000;
+    --brand-charcoal: #1A1A1A;
+    --brand-blue: #1E3A8A;
+    --brand-amber: #F59E0B;
+    --brand-green: #16A34A;
+    --brand-light: #F8F9FA;
+    --brand-gray: #6B7280;
+
+    --danger: oklch(0.6474 0.2027 13.17); /* #EF486A */
+    --success: oklch(0.7202 0.1184 134.32); /* #85B567 */
+    --success-hover: oklch(0.5515 0.1489 146.79); /* #218838 */
+    --confirm-hover: oklch(0.7738 0.2348 138.79); /* #57D61C */
+    --warning: oklch(0.789 0.184 75.342); /* #FDA500 */
+    --light: oklch(0.9702 0 0); /* #F5F5F5 */
+    --dark: oklch(0.2852 0.0182 285.19); /* #292933 */
+    --soft-dark: oklch(0.2284 0.0251 284.24); /* #1B1B28 */
+    --gray: oklch(0.6988 0.013 286.06); /* #9D9DA6 */
+    --tag-text-color: oklch(0.2621 0.0095 248.19); /* #212925 */
+    --background: oklch(0.2393 0.0581 256.66); /* #0b1f3a */
+
+    /* Fonts */
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+}
+
+.container {
+  @apply mx-auto max-w-310 px-large md:px-xhuge lg:px-2xhuge;
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thumb-slate-700 {
+    scrollbar-color: #334155 transparent;
+  }
+
+  .scrollbar-thumb-slate-700::-webkit-scrollbar-thumb {
+    background-color: #334155;
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thumb-gray-700 {
+    scrollbar-color: #374151 transparent;
+  }
+
+  .scrollbar-thumb-gray-700::-webkit-scrollbar-thumb {
+    background-color: #374151;
+    border-radius: 9999px;
+  }
+
+  .scrollbar-track-slate-800::-webkit-scrollbar-track {
+    background-color: #1e293b;
+  }
+
+  .scrollbar-track-gray-50::-webkit-scrollbar-track {
+    background-color: #f9fafb;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+/* Keyframes */
+@keyframes wiggle {
+  0% { transform: translateX(-100%); opacity: 0; }
+  100% { transform: translateX(120%); }
+}
+
+@keyframes float {
+  0% { transform: translate(0px, 0px); }
+  50% { transform: translate(30px, -30px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+@keyframes glossy {
+  0% { transform: translate(-250px,-50%) rotate(45deg); }
+  100% { transform: translate(50px,-50%) rotate(45deg); }
+}
+
+@keyframes spin_reverse {
+  to { transform: rotate(-360deg); }
+}
+.text-size-title {
+  font-size: clamp(2rem, 3vw + 1rem, 2.625rem);
+}
+
+.text-size-header {
+  font-size: clamp(1.25rem, 1.5vw + 1rem, 1.5rem);
+}
+
+.text-size-sub-header {
+  font-size: clamp(1rem, 1vw + 0.8rem, 1.25rem);
+}
+
+.text-size-body {
+  font-size: clamp(0.8125rem, 0.6vw + 0.7rem, 1rem);
+}
+
+.text-size-accent {
+  font-size: clamp(0.75rem, 0.4vw + 0.65rem, 0.875rem);
+}
+
+.mySwiper-review3-thumbnail .swiper-slide-thumb-active {
+  border-color: rgb(var(--highlight-border));
+}
+.mySwiper-review3 .swiper-pagination-bullet {
+  width: 33px;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background-color: #d1d5db;
+  transition: all 300ms;
+}
+
+.mySwiper-review3 .swiper-pagination-bullet-active {
+  width: 71px;
+  background-color: rgb(var(--color-background-secondary));
+}
+.mySwiper-review3 .swiper-pagination-bullet-active:after {
+  display: none;
+}
+
+@layer utilities {
+  /* Custom Utilities from Tailwind Config */
+  .bg-placeholder {
+    background-image: url('/public/defualt/placeholder.png');
+  }
+  .shadow-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  .animate-wiggle {
+    animation: wiggle 1s ease-in forwards;
+  }
+  .animate-float {
+    animation: float 10s infinite ease-in-out;
+  }
+  .animate-glossy {
+    animation: glossy 10s infinite ease-in-out alternate;
+  }
+
+  .active-style-apply {
+    border-color: #1e40af !important;
+    border-width: 4px !important;
+    padding: 0.25rem;
+  }
+  .curve-shadow {
+    box-shadow: 0 -30px 0 0 #fff;
+  }
+  .hero_text_initial {
+    transform: translateY(1.5rem);
+    opacity: 0;
+  }
+  .highlight {
+    background-color: #fde047;
+    color: #000;
+  }
+  .active-border {
+    border: 1px dashed #9ca3af;
+    padding: 0.25rem;
+  }
+
+  .active-nav {
+    background-color: rgb(var(--color-backend-background-accent));
+    color: rgb(var(--color-text-invert));
+  }
+
+  .prevent-tailwind-css * {
+    all: unset;
+    display: revert;
+    margin: 0;
+    padding: 0;
+  }
+
+  .prevent-tailwind-css h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0.67em 0;
+  }
+
+  .prevent-tailwind-css h2,
+  .prevent-tailwind-css h3,
+  .prevent-tailwind-css h4 {
+    font-weight: bold;
+  }
+
+  .prevent-tailwind-css ul {
+    list-style-type: disc;
+    margin-left: 1.5em;
+    padding-left: 1em;
+  }
+  .prevent-tailwind-css a {
+    color: #3b82f6;
+    cursor: pointer;
+  }
+
+  .prevent-tailwind-css a:hover {
+    color: #1d4ed8; /* Darker blue for hover state */
+  }
+
+  .prevent-tailwind-css li {
+    margin-bottom: 0.5em;
+  }
+
+  .prevent-tailwind-css p {
+    margin-bottom: 1em;
+  }
+  .prevent-tailwind-css .__se__float-right {
+    float: right;
+    padding: 4px 0px 4px 4px;
+  }
+  .prevent-tailwind-css .__se__float-left {
+    float: left;
+    padding: 4px 4px 4px 0px;
+  }
+  .prevent-tailwind-css .__se__float-center {
+    width: fit-content;
+    margin: 0 auto;
+    padding: 4px 0;
+  }
+}
+
+.swiper-pagination-bullet {
+  width: 14px;
+  height: 14px;
+  /* border: 2px solid #F06728; */
+  background: rgb(232, 233, 255);
+  position: relative;
+}
+.swiper-pagination-bullet-active::after {
+  content: "";
+  border-radius: 33px;
+  width: 6px;
+  height: 6px;
+  position: absolute;
+  background: #0298c0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.animate__delay-300ms {
+  animation-delay: 300ms !important;
+}

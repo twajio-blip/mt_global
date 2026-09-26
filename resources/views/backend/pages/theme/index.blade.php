@@ -60,6 +60,11 @@
                                     placeholder="Email" required> --}}
                             </div>
                             <div class="col-span-12 md:col-span-6">
+                                <x-backend.input-label :value="'Licence'" for="licence" />
+                                <x-backend.input-field type="text" name="licence" id='licence' :value="$general?->licence"
+                                    placeholder="licence" />
+                            </div>
+                            <div class="col-span-12 md:col-span-6">
                                 <x-backend.input-label :value="'Location'" for="location" />
                                 <x-backend.input-field type="text" name="location" id='location' :value="$general?->location"
                                     placeholder="Location" required />

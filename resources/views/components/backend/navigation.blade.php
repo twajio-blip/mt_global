@@ -62,6 +62,28 @@
             </li>
         @endif
     @endisset
+    {{-- Jobs --}}
+    <li class="px-2 space-y-1">
+        <div
+            class="dropdown-trigger {{ Route::is('jobs.*') ? 'sidebar-nav-active' : '' }}  active-trigger flex items-center gap-2 py-2.5 px-4 cursor-pointer rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">
+            <span class="w-4 h-4 flex items-center"><i class="fa-solid fa-briefcase"></i></span>
+            <h1 class="hideable">Jobs</h1>
+            <i class="dropdown-icon hideable fa-solid fa-angle-down ml-auto rotate-0 transition-transform inline-block"></i>
+        </div>
+        <ul class="dropdown space-y-1" style="display: {{ Route::is('jobs.*') ? 'block' : 'none' }};">
+            <li><a href="{{ route('jobs.countries.index') }}"
+                    class="active-trigger {{ Route::is('jobs.countries.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Countries</a>
+            </li>
+            <li><a href="{{ route('jobs.designations.index') }}"
+                    class="active-trigger {{ Route::is('jobs.designations.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Manage
+                    Designations</a>
+            </li>
+            <li><a href="{{ route('jobs.jobs.index') }}"
+                    class="active-trigger {{ Route::is('jobs.jobs.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Manage
+                    Jobs</a>
+            </li>
+        </ul>
+    </li>
     {{-- <h2 old_data="Content & Media"
         class="px-6 py-2 text-skin-backend-text-base text-opacity-40 nav-section-title text-[12px]">Content & Media</h2>
     <!-- Element -->

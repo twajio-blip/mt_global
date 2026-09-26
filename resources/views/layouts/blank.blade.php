@@ -25,7 +25,6 @@
     <link rel="stylesheet" href="{{ asset('/packages/css/magnific-popup.css') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 

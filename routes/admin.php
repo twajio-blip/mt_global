@@ -11,6 +11,9 @@ use App\Http\Controllers\Backend\Faq\FaqController;
 use App\Http\Controllers\Backend\Font\FontController;
 use App\Http\Controllers\Backend\Gallery\GalleryCategoryController;
 use App\Http\Controllers\Backend\Gallery\GalleryImageController;
+use App\Http\Controllers\Backend\Job\CountryJobController;
+use App\Http\Controllers\Backend\Job\JobDesignationController;
+use App\Http\Controllers\Backend\Job\JobCountryController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\Pages\PagesController;
 use App\Http\Controllers\Backend\Profile\ProfileController;
@@ -56,6 +59,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('slider', SliderController::class);
     Route::resource('service', ServiceController::class);
     Route::resource('faq', FaqController::class);
+
+    Route::prefix('jobs')->name('jobs.')->group(function () {
+        Route::resource('countries', JobCountryController::class)->except(['create', 'show', 'edit']);
+        Route::resource('designations', JobDesignationController::class)->except(['create', 'show', 'edit']);
+        Route::resource('jobs', CountryJobController::class)->except(['create', 'show', 'edit']);
+    });
 
     // Gallery Route
     Route::prefix('gallery')->name('gallery.')->group(function () {

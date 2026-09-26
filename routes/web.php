@@ -55,7 +55,7 @@ Route::middleware(['visitor'])->group(function () {
 
 Route::get('admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
-// Clear all optimization caches (config, route, view, cache) â€“ auth required
+// Clear all optimization caches (config, route, view, cache) – auth required
 Route::get('optimize-clear', function () {
     Artisan::call('optimize:clear');
     return response()->json([

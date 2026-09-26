@@ -25,8 +25,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
-    {{-- Flowbite --}}
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet">
     <!-- Swiper js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
@@ -73,6 +71,7 @@
 <body class="bg-skin-primary">
 
 
+    @if (false)
     <div id="global-preloader"
         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999999; display: flex; align-items: center; justify-content: center; background-color: #ffffff; transition: opacity 0.7s ease;">
         <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
@@ -105,6 +104,7 @@
             }
         });
     </script>
+    @endif
 
     <div class="min-h-screen bg-brand-light font-body selection:bg-brand-red selection:text-white">
         {{-- <x-frontend.top-header /> --}}
@@ -119,7 +119,7 @@
         @endif
 
         <!-- Main -->
-        <main class="bg-brand-light pt-20">
+        <main class="bg-brand-light mt-27.25">
 
             {{ $slot }}
 

@@ -2,7 +2,6 @@ import "./bootstrap";
 import "preline";
 
 import AOS from 'aos';
-import 'aos/dist/aos.css';
 
 import Alpine from "alpinejs";
 import { HSStaticMethods } from "preline";
