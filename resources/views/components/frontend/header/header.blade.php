@@ -9,7 +9,7 @@
     $licence = $general->licence ?? '';
     $phone = $general->contact ?? '';
     $phoneHref = preg_replace('/[^0-9+]/', '', $phone);
-    $logo = !empty($general?->header) ? asset('images/' . $general->header) : asset('image.png');
+    $logo = !empty($general?->header) ? asset('logo/' . $general->header) : asset('image.png');
     $loginUrl = \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/admin/login');
     $isFixed = ($position ?? '') === 'fix';
 @endphp

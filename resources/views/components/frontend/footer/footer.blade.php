@@ -21,7 +21,7 @@
     $footerGroups = $footerGroups ?? collect();
     $galleryImages = $galleryImages ?? collect();
     $footerLogo = $general?->footer ?? $general?->logo ?? $general?->fav_icon ?? null;
-    $footerLogoUrl = $footerLogo ? asset('images/' . $footerLogo) : asset('image.png');
+    $footerLogoUrl = $footerLogo ? asset('logo/' . $footerLogo) : asset('image.png');
     $footerDescription = $general?->description ?? $general?->tagline ?? 'RAR Lift is a premier vendor and distributor of international lift brands, committed to providing safe, reliable, and innovative vertical mobility solutions.';
     $footerAddress = $general?->address ?? $general?->location ?? '123 Business Avenue, Block C, Dhaka 1212, Bangladesh';
     $footerPhone = $general?->phone ?? $general?->contact ?? "+880 1713 018 796\n+880 197 301 8796";

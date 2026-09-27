@@ -2,7 +2,7 @@
     $general = $general ?? null;
     $preloaderEnabled = false;
     $preloaderLogo = $general?->logo ?? $general?->fav_icon ?? $general?->footer ?? 'placeholder.png';
-    $preloaderLogoUrl = asset('images/' . $preloaderLogo);
+    $preloaderLogoUrl = asset('logo/' . $preloaderLogo);
     $isHome = request()->is('/');
 @endphp
 

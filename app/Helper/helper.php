@@ -45,7 +45,7 @@ if (!function_exists("input")) {
 }
 
 if (!function_exists("imageComprese")) {
-    function imageComprese($image)
+    function imageComprese($image, $path = 'images')
     {
 
         // create image manager with desired driver
@@ -58,21 +58,26 @@ if (!function_exists("imageComprese")) {
 
         $encoded = $compressedImage->encode(new WebpEncoder(quality: 65)); // Intervention\Image\EncodedImage
         $encrypted =  md5($image) . '.webp';
-        $encoded->save('images/' . $encrypted);
+        $path = trim($path, '/');
+        if (!File::exists(public_path($path))) {
+            File::makeDirectory(public_path($path), 0755, true);
+        }
+        $encoded->save(public_path($path . '/' . $encrypted));
         return $encrypted;
     }
 }
 
 if (!function_exists("imageProccess")) {
-    function imageProccess($data, $oldimage = false, $column = 'image')
+    function imageProccess($data, $oldimage = false, $column = 'image', $path = 'images')
     {
         $collect = collect($data);
+        $path = trim($path, '/');
         if (isset($collect[$column])) {
-            $encrypted = imageComprese($collect[$column]);
+            $encrypted = imageComprese($collect[$column], $path);
             $prepared = $collect->except($column)->merge([$column => $encrypted]);
             if ($oldimage) {
-                if (file_exists('images/' . $oldimage)) {
-                    unlink('images/' . $oldimage);
+                if (file_exists(public_path($path . '/' . $oldimage))) {
+                    unlink(public_path($path . '/' . $oldimage));
                 }
             }
         } else {
@@ -81,8 +86,8 @@ if (!function_exists("imageProccess")) {
 
         if (isset($collect[$column])  && empty($collect[$column]) &&  $oldimage) {
             if ($oldimage) {
-                if (file_exists('images/' . $oldimage)) {
-                    unlink('images/' . $oldimage);
+                if (file_exists(public_path($path . '/' . $oldimage))) {
+                    unlink(public_path($path . '/' . $oldimage));
                 }
             }
         }

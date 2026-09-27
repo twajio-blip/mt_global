@@ -1,0 +1,77 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+body {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  color: #0f1b2d;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+
+.rich-content {
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.rich-content p {
+  margin: 0 0 0.75rem;
+}
+.rich-content p:last-child {
+  margin-bottom: 0;
+}
+.rich-content ul,
+.rich-content ol {
+  padding-left: 1.25rem;
+  margin: 0 0 0.75rem;
+}
+.rich-content ul {
+  list-style: disc;
+}
+.rich-content ol {
+  list-style: decimal;
+}
+.rich-content li {
+  margin: 0.35rem 0;
+  padding-left: 0.25rem;
+}
+.rich-content li::marker {
+  color: #1f4580;
+}
+.rich-content strong,
+.rich-content b {
+  font-weight: 600;
+  color: #0f1b2d;
+}
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #94a1b2;
+  pointer-events: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

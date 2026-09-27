@@ -2,8 +2,7 @@
 
 <div id="{{ $id }}"
     class='hs-overlay hidden w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto'>
-    <div {{ $attributes->merge(['class' => 'hs-overlay-open:mt-7 hs-overlay-open:opacity-100
-        hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto']) }}>
+    <div {{ $attributes->merge(['class' => 'mt-7 opacity-100 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto']) }}>
         <form action="{{ $action }}" method="{{ $method }}" id="{{ $form_id }}" enctype="multipart/form-data">
             <div
                 class="relative flex flex-col bg-skin-backend-secondary text-skin-backend-text-base rounded-[10px] overflow-hidden">
@@ -34,7 +33,8 @@
                         {{ $button }}
                     </button>
                     <button disabled type="button"
-                        class="bg-skin-backend-accent loader text-skin-invert  font-medium rounded-[10px]  text-xs px-7 py-3 text-center me-2 inline-flex items-center hidden">
+                        style="display: none;"
+                        class="bg-skin-backend-accent loader text-skin-invert font-medium rounded-[10px] text-xs px-7 py-3 text-center me-2 items-center">
                         <svg aria-hidden="true" role="status" class="inline w-4 h-4 me-3 text-skin-invert  animate-spin"
                             viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -52,3 +52,27 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById(@json($form_id));
+        if (!form) return;
+
+        const submitButton = form.querySelector('.submit');
+        const loaderButton = form.querySelector('.loader');
+
+        if (loaderButton) {
+            loaderButton.style.display = 'none';
+        }
+
+        form.addEventListener('submit', function () {
+            if (submitButton) {
+                submitButton.classList.add('hidden');
+            }
+
+            if (loaderButton) {
+                loaderButton.style.display = 'inline-flex';
+            }
+        });
+    });
+</script>

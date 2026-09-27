@@ -1,5 +1,9 @@
-<input type="checkbox"
-    {{ $attributes->merge([
-        'class' => "relative w-[3.25rem] h-7 p-px bg-gray-100 border-transparent text-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:ring-blue-600 disabled:opacity-50 disabled:pointer-events-none checked:bg-none checked:text-blue-600 checked:border-blue-600 focus:checked:border-blue-600
-            before:inline-block before:w-6 before:h-6 before:bg-white checked:before:bg-blue-200 before:translate-x-0 checked:before:translate-x-full before:rounded-full before:shadow before:transform before:ring-0 before:transition before:ease-in-out before:duration-200",
-    ]) }}>
+<label class="inline-flex items-center cursor-pointer">
+    <input
+        type="checkbox"
+        {{ $attributes->merge(['class' => 'sr-only peer']) }}>
+
+    <span
+        class="relative block h-6 w-11 rounded-full bg-[#323232] transition-colors duration-200 peer-checked:bg-skin-backend-accent peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-500 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white">
+    </span>
+</label>

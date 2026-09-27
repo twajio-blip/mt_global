@@ -32,7 +32,7 @@ Thumbs.db
 temp_git_log.txt
 
 # Unnecessary extracted ZIP folder
-/MT Global_demo/
+/demo1/
 
 /public/images/
 /public/static_images/

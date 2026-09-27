@@ -13,7 +13,7 @@
     <meta name="robots" content="{{ $pageinfo->seo_index ?? '' }}">
 
     {{-- favicon --}}
-    <link rel="icon" type="image/png" href="{{ asset('images/' . ($general->fav_icon ?? 'placeholder.png')) }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo/' . ($general->fav_icon ?? 'image.png')) }}">
     <!-- font inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">

@@ -337,7 +337,7 @@
                                         class="bg-skin-backend-accent px-4 py-2 font-bold w-full inline-block text-skin-invert">Fav
                                         Icon</label>
                                         <div class="px-4 pb-2">
-                                            <img src="{{ asset('images/' . ($general->fav_icon ?? 'placeholder.png')) }}"
+                                            <img src="{{ asset('logo/' . ($general->fav_icon ?? 'image.png')) }}"
                                             alt="" class="mx-auto  h-[45px] object-cover object-center">
                                         </div>
                                         <div class="px-4 pb-2">
@@ -351,7 +351,7 @@
                                     class="bg-skin-backend-accent px-4 py-2 font-bold w-full inline-block text-skin-invert">Header
                                         logo</label>
                                         <div class="px-4 pb-2">
-                                            <img src="{{ asset('images/' . ($general->header ?? 'placeholder.png')) }}"
+                                            <img src="{{ asset('logo/' . ($general->header ?? 'image.png')) }}"
                                             alt="" class="mx-auto  h-[45px] object-cover object-center">
                                         </div>
                                         <div class="px-4 pb-2">
@@ -366,7 +366,7 @@
                                     class="bg-skin-backend-accent px-4 py-2 font-bold w-full inline-block text-skin-invert">Footer
                                         logo</label>
                                     <div class="px-4 pb-2">
-                                        <img src="{{ asset('images/' . ($general->footer ?? 'placeholder.png')) }}"
+                                        <img src="{{ asset('logo/' . ($general->footer ?? 'image.png')) }}"
                                         alt="" class="mx-auto h-[45px] object-cover object-center">
                                     </div>
                                     <div class="px-4 pb-2">

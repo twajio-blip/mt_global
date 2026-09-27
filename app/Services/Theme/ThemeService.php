@@ -40,7 +40,7 @@ class ThemeService
         foreach ($imageFields as $field) {
             if (isset($data[$field])) {
                 $oldImage = $general ? $general->$field : null;
-                $dataSet = imageProccess($dataSet, $oldImage, $field);
+                $dataSet = imageProccess($dataSet, $oldImage, $field, 'logo');
             }
         }
         $payload = is_array($dataSet) ? $dataSet : $dataSet->toArray();

@@ -5,14 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{-- fav icon --}}
-    <link rel="icon" type="image/png" href="{{asset('images/'.($general->fav_icon??'placeholder.png'))}}">
+    <link rel="icon" type="image/png" href="{{ asset('logo/' . ($general->fav_icon ?? 'image.png')) }}">
     
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{$general->website_name??''}}</title>
     <!-- Fonts -->
-    @if ($font_backend)
-        {!!$font_backend->font_links!!}
-    @endif
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
 
     <!-- Fontawsome CDN Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -39,7 +38,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-custom" style="font-family: {{$font_backend == null ? '' :$font_backend->font_family}};">
+<body class="font-sans">
     <section class="flex">
         <!-- side bar starts-->
         <div class="fixed overlay w-fit h-full bg-black bg-opacity-20 z-40 md:w-fit">
