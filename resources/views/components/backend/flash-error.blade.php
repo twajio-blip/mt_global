@@ -1,6 +1,10 @@
 @props(['message', 'type'])
-<div id="dismiss-alert"
-    class=" absolute top-5 right-5 hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300  {{$type=='success' ? 'bg-teal-50 border-teal-200' : 'bg-red-200 border-red-200'}} border  text-sm text-teal-800 rounded-lg p-4"
+@php
+    $alertId = 'dismiss-alert-' . uniqid();
+@endphp
+
+<div id="{{ $alertId }}"
+    class="fixed top-5 right-5 z-[9999] transition duration-300 {{$type=='success' ? 'bg-teal-50 border-teal-200 text-teal-800' : 'bg-red-200 border-red-200 text-red-800'}} border text-sm rounded-lg p-4"
     role="alert">
     <div class="flex">
         <div class="flex-shrink-0">
@@ -15,8 +19,8 @@
         <div class="ps-3 ms-auto">
             <div class="-mx-1.5 -my-1.5">
                 <button type="button"
-                    class="inline-flex remove bg-teal-50 rounded-lg p-1.5 {{$type=='success' ? 'text-teal-500 focus:ring-teal-600 focus:ring-offset-teal-50 hover:bg-teal-100' : 'text-red-500 focus:ring-red-600 focus:ring-offset-red-50 hover:bg-red-100'}}  focus:outline-none focus:ring-2 focus:ring-offset-2 "
-                    data-hs-remove-element="#dismiss-alert">
+                    class="inline-flex flash-dismiss bg-teal-50 rounded-lg p-1.5 {{$type=='success' ? 'text-teal-500 focus:ring-teal-600 focus:ring-offset-teal-50 hover:bg-teal-100' : 'text-red-500 focus:ring-red-600 focus:ring-offset-red-50 hover:bg-red-100'}}  focus:outline-none focus:ring-2 focus:ring-offset-2 "
+                    data-alert-id="{{ $alertId }}">
                     <span class="sr-only">Dismiss</span>
                     <svg class="flex-shrink-0 h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -31,7 +35,22 @@
 </div>
 
 <script>
-    setTimeout(() => {
-        $('.remove').trigger('click')
-    }, 3000);
+    (function () {
+        const alert = document.getElementById(@json($alertId));
+        if (!alert) return;
+
+        const dismiss = function () {
+            alert.classList.add('translate-x-5', 'opacity-0');
+            setTimeout(function () {
+                alert.remove();
+            }, 300);
+        };
+
+        const button = alert.querySelector('.flash-dismiss');
+        if (button) {
+            button.addEventListener('click', dismiss);
+        }
+
+        setTimeout(dismiss, 3000);
+    })();
 </script>

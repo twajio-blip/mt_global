@@ -1,9 +1,10 @@
 {{-- Delete Modal --}}
 <div id="hs-danger-alert"
-class="hs-overlay hidden size-full fixed top-0 start-0 z-[1000] overflow-x-hidden overflow-y-auto" role="dialog"
+data-delete-modal
+class="hs-overlay hidden size-full fixed top-0 start-0 z-[1000] overflow-x-hidden overflow-y-auto bg-black/60 p-4" role="dialog"
 tabindex="-1" aria-labelledby="hs-danger-alert-label">
 <div
-    class="hs-overlay-open:mt-7 hs-overlay-open:opacity-100 hs-overlay-open:duration-500 mt-0 opacity-0 ease-out transition-all md:max-w-2xl md:w-full m-3 md:mx-auto">
+    class="mt-7 opacity-100 ease-out transition-all md:max-w-2xl md:w-full m-3 md:mx-auto">
     <div
         class="relative flex flex-col bg-skin-backend-secondary text-skin-backend-text-base shadow-sm rounded-[10px] overflow-hidden">
         <div class="absolute top-2 end-2">
@@ -66,3 +67,78 @@ tabindex="-1" aria-labelledby="hs-danger-alert-label">
 </div>
 </div>
 {{-- Delete Modal --}}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.backendDeleteModalControllerReady) return;
+        window.backendDeleteModalControllerReady = true;
+
+        const modalSelector = '#hs-danger-alert';
+
+        function getModal(selector) {
+            return selector === modalSelector ? document.querySelector('[data-delete-modal]') : null;
+        }
+
+        function removePrelineBackdrops() {
+            document.querySelectorAll('.hs-overlay-backdrop').forEach(function(backdrop) {
+                backdrop.remove();
+            });
+        }
+
+        function openDeleteModal(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('open', 'opened');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('overflow-hidden');
+            removePrelineBackdrops();
+        }
+
+        function closeDeleteModal(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('open', 'opened');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('overflow-hidden');
+            removePrelineBackdrops();
+        }
+
+        document.addEventListener('click', function(event) {
+            const trigger = event.target.closest('[data-hs-overlay]');
+            if (!trigger) return;
+
+            const modal = getModal(trigger.getAttribute('data-hs-overlay'));
+            if (!modal) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            if (trigger.dataset.deleteAction) {
+                const deleteForm = modal.querySelector('form#delete');
+                if (deleteForm) {
+                    deleteForm.action = trigger.dataset.deleteAction;
+                }
+            }
+
+            if (modal.contains(trigger) || !modal.classList.contains('hidden')) {
+                closeDeleteModal(modal);
+            } else {
+                openDeleteModal(modal);
+            }
+        }, true);
+
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('[data-delete-modal]')) {
+                closeDeleteModal(event.target);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key !== 'Escape') return;
+
+            const modal = document.querySelector('[data-delete-modal]:not(.hidden)');
+            if (modal) {
+                closeDeleteModal(modal);
+            }
+        });
+    });
+</script>

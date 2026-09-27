@@ -1,7 +1,8 @@
 @props(['id', 'title', 'button', 'form_id', 'action', 'method'])
 
 <div id="{{ $id }}"
-    class='hs-overlay hidden w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto'>
+    data-backend-modal
+    class='hs-overlay hidden w-full h-full fixed top-0 start-0 z-[80] overflow-x-hidden overflow-y-auto bg-black/60 p-4'>
     <div {{ $attributes->merge(['class' => 'mt-7 opacity-100 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto']) }}>
         <form action="{{ $action }}" method="{{ $method }}" id="{{ $form_id }}" enctype="multipart/form-data">
             <div
@@ -10,7 +11,7 @@
                     <h2 class="text-[18px] font-bold">{{$title??''}}</h2>
                     <button type="button"
                         class="flex justify-center items-center p-2 text-sm font-semibold rounded-lg border border-transparent hover:bg-skin-backend-secondary disabled:opacity-50 disabled:pointer-events-none"
-                        data-hs-overlay="#{{ $id }}">
+                        data-backend-modal-close>
                         <span class="sr-only">Close</span>
                         <svg class="flex-shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -24,7 +25,7 @@
                 <div class="flex justify-end items-center gap-x-2 pt-3 pb-10 px-4">
                     <button type="button"
                         class="cancle {{ $id }} px-12 py-3 text-skin-hover border border-highlight rounded-[10px] hover:bg-skin-backend-accent hover:text-skin-invert transition-colors font-semibold text-xs disabled:opacity-50 disabled:pointer-events-none"
-                        data-hs-overlay="#{{ $id }}">
+                        data-backend-modal-close>
                         Cancel
                     </button>
                     @if ($button)
@@ -55,6 +56,107 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        if (!window.backendModalControllerReady) {
+            window.backendModalControllerReady = true;
+
+            function closeBackendModal(modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('open', 'opened');
+                modal.setAttribute('aria-hidden', 'true');
+                cleanupBackendModalState();
+            }
+
+            function openBackendModal(modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('open', 'opened');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('overflow-hidden');
+                document.querySelectorAll('.hs-overlay-backdrop').forEach(function(backdrop) {
+                    backdrop.remove();
+                });
+            }
+
+            function cleanupBackendModalState() {
+                document.body.classList.remove('overflow-hidden');
+                document.documentElement.classList.remove('overflow-hidden');
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+                document.body.style.paddingRight = '';
+                document.documentElement.style.paddingRight = '';
+                document.querySelectorAll('.hs-overlay-backdrop').forEach(function(backdrop) {
+                    backdrop.remove();
+                });
+            }
+
+            window.openBackendModalBySelector = function(selector) {
+                const modal = selector ? document.querySelector(selector + '[data-backend-modal]') : null;
+                if (modal) {
+                    openBackendModal(modal);
+                }
+            };
+
+            window.closeBackendModalBySelector = function(selector) {
+                const modal = selector ? document.querySelector(selector + '[data-backend-modal]') : null;
+                if (modal) {
+                    closeBackendModal(modal);
+                }
+            };
+
+            window.cleanupBackendModalState = cleanupBackendModalState;
+
+            document.addEventListener('click', function(event) {
+                const closeTrigger = event.target.closest('[data-backend-modal-close]');
+                if (closeTrigger) {
+                    const modal = closeTrigger.closest('[data-backend-modal]');
+                    if (modal) {
+                        event.preventDefault();
+                        closeBackendModal(modal);
+                    }
+                    return;
+                }
+
+                const trigger = event.target.closest('[data-backend-modal-open]');
+                if (!trigger) return;
+
+                const selector = trigger.getAttribute('data-backend-modal-open');
+                const modal = selector ? document.querySelector(selector + '[data-backend-modal]') : null;
+                if (!modal) return;
+
+                event.preventDefault();
+
+                window.setTimeout(function() {
+                    openBackendModal(modal);
+                }, 0);
+            });
+
+            document.addEventListener('click', function(event) {
+                const trigger = event.target.closest('[data-hs-overlay]');
+                if (!trigger) return;
+
+                const selector = trigger.getAttribute('data-hs-overlay');
+                const modal = selector ? document.querySelector(selector + '[data-backend-modal]') : null;
+                if (!modal) return;
+
+                event.preventDefault();
+                closeBackendModal(modal);
+            }, true);
+
+            document.addEventListener('click', function(event) {
+                const modal = event.target.matches('[data-backend-modal]') ? event.target : null;
+                if (modal) {
+                    closeBackendModal(modal);
+                }
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key !== 'Escape') return;
+
+                document.querySelectorAll('[data-backend-modal]:not(.hidden)').forEach(function(modal) {
+                    closeBackendModal(modal);
+                });
+            });
+        }
+
         const form = document.getElementById(@json($form_id));
         if (!form) return;
 

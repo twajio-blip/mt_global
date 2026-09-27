@@ -17,7 +17,7 @@
                 </div>
 
                 <a class="py-2.5 px-4 inline-flex items-center gap-x-2 text-xs  font-[600] rounded-[10px] bg-skin-backend-accent hover:bg-opacity-90 transition-opacity duration-300 text-skin-invert disabled:opacity-50 disabled:pointer-events-none"
-                    href="#" data-hs-overlay="#create-model">
+                    href="#" data-backend-modal-open="#create-model">
                     <svg class="flex-shrink-0 w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                         viewBox="0 0 16 16" fill="none">
                         <path d="M2.63452 7.50001L13.6345 7.5M8.13452 13V2" stroke="currentColor" stroke-width="2"
@@ -98,12 +98,13 @@
                                         </a>
                                         <a data-json="{{ base64_encode($component->load('componentFiled')->toJson()) }}" id="update"
                                             class="inline-flex items-center justify-center gap-x-1 text-xs decoration-2 font-medium w-[26px] h-[26px] bg-[#3762ED] rounded-full"
-                                            href="#" data-hs-overlay="#edit-model">
+                                            href="#" data-backend-modal-open="#edit-model">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         <button component-id="{{$component->id}}" type="button" aria-haspopup="dialog"
                                             aria-expanded="false" aria-controls="hs-danger-alert"
                                             data-hs-overlay="#hs-danger-alert"
+                                            data-delete-action="{{ route('component.destroy', $component->id) }}"
                                             class="delete-btn gap-x-1 text-xs decoration-2 font-medium inline-flex no-underline items-center justify-center w-[26px] h-[26px] rounded-full bg-[#E61714]">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>

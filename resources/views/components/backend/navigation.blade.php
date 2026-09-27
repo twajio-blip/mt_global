@@ -74,9 +74,14 @@
             <li><a href="{{ route('jobs.countries.index') }}"
                     class="active-trigger {{ Route::is('jobs.countries.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Countries</a>
             </li>
+            <li><a href="{{ route('jobs.categories.index') }}"
+                    class="active-trigger {{ Route::is('jobs.categories.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Categories</a>
+            </li>
             <li><a href="{{ route('jobs.designations.index') }}"
-                    class="active-trigger {{ Route::is('jobs.designations.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Manage
-                    Designations</a>
+                    class="active-trigger {{ Route::is('jobs.designations.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Designations</a>
+            </li>
+            <li><a href="{{ route('jobs.benefits.index') }}"
+                    class="active-trigger {{ Route::is('jobs.benefits.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Benefits</a>
             </li>
             <li><a href="{{ route('jobs.jobs.index') }}"
                     class="active-trigger {{ Route::is('jobs.jobs.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Manage

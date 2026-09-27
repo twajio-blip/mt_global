@@ -4,7 +4,8 @@
 
 <div class="py-5 border-t border-default border-opacity-50 space-y-4">
     <div id='sortable'
-        class="ui space-y-2 h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800">
+        class="ui space-y-2 h-[400px] max-h-[400px] overflow-y-scroll pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800"
+        style="scrollbar-gutter: stable;">
         @foreach ($components as $value)
         <div id='{{ $value->name . $value->id }}'
             class="flex flex-col bg-skin-backend-secondary component-parent border border-default border-opacity-25 rounded-[10px]">
@@ -58,7 +59,7 @@
     <div>
         <x-backend.button type="button" :value="'Add UI Block'"
             class="px-6 py-2.5 bg-skin-backend-accent rounded-[10px] text-skin-invert hover:bg-opacity-90 transition-opacity"
-            data-hs-overlay="#ui-model" :icon="'fa-solid fa-plus'" />
+            data-backend-modal-open="#ui-model" :icon="'fa-solid fa-plus'" />
     </div>
 </div>
 

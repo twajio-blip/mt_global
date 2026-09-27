@@ -57,12 +57,16 @@
                     if (page_id) {
                         fileds.push(`<input type="hidden" name='page_id' value="${page_id}" >`)
                     }
-                    HSOverlay.open('#field-model');
+                    if (window.openBackendModalBySelector) {
+                        window.openBackendModalBySelector('#field-model');
+                    }
                 } else {
                     value = data.component_filed;
                     // Default mode = use GLOBAL data (no page_id for fields)
                     fileds.push(`<input type="hidden" name='status' value="0" >`)
-                    HSOverlay.open('#field-model');
+                    if (window.openBackendModalBySelector) {
+                        window.openBackendModalBySelector('#field-model');
+                    }
                 }
                 fileds.push(`<input type="hidden" name='component_id' value="${data.id}" >`)
                 if (page_id) {
@@ -417,7 +421,15 @@
                     $('.submit').removeClass('hidden');
                     return;
                 }
-                thisElement.find('.cancle').trigger('click')
+                if (window.closeBackendModalBySelector) {
+                    window.closeBackendModalBySelector('#field-model');
+                    window.closeBackendModalBySelector('#ui-model');
+                } else {
+                    thisElement.find('.cancle').trigger('click')
+                }
+                if (window.cleanupBackendModalState) {
+                    window.cleanupBackendModalState();
+                }
 
                 let data = [];
                 // Field 
@@ -485,12 +497,22 @@
                     $sortable.find("#" + json.item.name + json.item.id).replaceWith(ui);
                 }
 
+                if ($sortable.length) {
+                    $sortable.scrollTop($sortable[0].scrollHeight);
+                }
+
                 $('.addComponent').html(data);
                 $('.loader').addClass('hidden');
                 $('.submit').removeClass('hidden');
+                if (window.cleanupBackendModalState) {
+                    window.cleanupBackendModalState();
+                }
             }).catch(function(err) {
                 $('.loader').addClass('hidden');
                 $('.submit').removeClass('hidden');
+                if (window.cleanupBackendModalState) {
+                    window.cleanupBackendModalState();
+                }
                 var msg = (err && err.json && err.json.error) ? err.json.error : (err && err.message) ? err.message : 'Could not add component.';
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({ icon: 'error', title: 'Error', text: msg });

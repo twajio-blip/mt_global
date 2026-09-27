@@ -12,6 +12,8 @@ use App\Http\Controllers\Backend\Font\FontController;
 use App\Http\Controllers\Backend\Gallery\GalleryCategoryController;
 use App\Http\Controllers\Backend\Gallery\GalleryImageController;
 use App\Http\Controllers\Backend\Job\CountryJobController;
+use App\Http\Controllers\Backend\Job\JobBenefitController;
+use App\Http\Controllers\Backend\Job\JobDesignationCategoryController;
 use App\Http\Controllers\Backend\Job\JobDesignationController;
 use App\Http\Controllers\Backend\Job\JobCountryController;
 use App\Http\Controllers\Backend\NotificationController;
@@ -62,7 +64,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     Route::prefix('jobs')->name('jobs.')->group(function () {
         Route::resource('countries', JobCountryController::class)->except(['create', 'show', 'edit']);
+        Route::resource('categories', JobDesignationCategoryController::class)->except(['create', 'show', 'edit']);
         Route::resource('designations', JobDesignationController::class)->except(['create', 'show', 'edit']);
+        Route::resource('benefits', JobBenefitController::class)->except(['create', 'show', 'edit']);
         Route::resource('jobs', CountryJobController::class)->except(['create', 'show', 'edit']);
     });
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class JobDesignation extends BaseModel
+class JobCountryLocation extends BaseModel
 {
     use HasFactory;
 
@@ -16,13 +16,13 @@ class JobDesignation extends BaseModel
         'is_active' => 'boolean',
     ];
 
-    public function jobs(): HasMany
+    public function country(): BelongsTo
     {
-        return $this->hasMany(CountryJob::class);
+        return $this->belongsTo(JobCountry::class, 'job_country_id');
     }
 
-    public function category(): BelongsTo
+    public function jobs(): HasMany
     {
-        return $this->belongsTo(JobDesignationCategory::class, 'job_designation_category_id');
+        return $this->hasMany(CountryJob::class, 'job_country_location_id');
     }
 }

@@ -14,12 +14,11 @@
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Country'" for="job_country_id" />
-                    <select name="job_country_id" class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base text-opacity-50 rounded-[4px]" required>
-                        <option value="">Select country</option>
-                        @foreach ($countries as $country)
-                            <option value="{{ $country->id }}">{{ $country->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative job-combobox" data-job-combobox="country">
+                        <input type="hidden" name="job_country_id" data-country-select required>
+                        <input type="text" data-job-combobox-search class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]" placeholder="Select country" autocomplete="off">
+                        <div data-job-combobox-options class="absolute left-0 right-0 top-full z-50 mt-1 hidden max-h-56 overflow-y-auto rounded-[8px] border border-default border-opacity-25 bg-skin-backend-secondary shadow-lg"></div>
+                    </div>
                 </div>
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Job Title'" for="title" />
@@ -27,16 +26,19 @@
                 </div>
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Designation'" for="designation" />
-                    <select name="job_designation_id" class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base text-opacity-50 rounded-[4px]" required>
-                        <option value="">Select designation</option>
-                        @foreach ($designations as $designation)
-                            <option value="{{ $designation->id }}">{{ $designation->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative job-combobox" data-job-combobox="designation">
+                        <input type="hidden" name="job_designation_id" required>
+                        <input type="text" data-job-combobox-search class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]" placeholder="Select designation" autocomplete="off">
+                        <div data-job-combobox-options class="absolute left-0 right-0 top-full z-50 mt-1 hidden max-h-56 overflow-y-auto rounded-[8px] border border-default border-opacity-25 bg-skin-backend-secondary shadow-lg"></div>
+                    </div>
                 </div>
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Location'" for="location" />
-                    <x-backend.input-field type="text" name="location" placeholder="Location" />
+                    <div class="relative job-combobox" data-job-combobox="location">
+                        <input type="hidden" name="job_country_location_id" data-location-select>
+                        <input type="text" data-job-combobox-search class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]" placeholder="Select location" autocomplete="off">
+                        <div data-job-combobox-options class="absolute left-0 right-0 top-full z-50 mt-1 hidden max-h-56 overflow-y-auto rounded-[8px] border border-default border-opacity-25 bg-skin-backend-secondary shadow-lg"></div>
+                    </div>
                 </div>
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Employer'" for="employer" />
@@ -53,6 +55,19 @@
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Employment Type'" for="employment_type" />
                     <x-backend.input-field type="text" name="employment_type" placeholder="Full-time" />
+                </div>
+                <div class="col-span-12">
+                    <x-backend.input-label :value="'Benefits / Facilities'" />
+                    <div class="grid grid-cols-1 gap-3 rounded-[10px] border border-default border-opacity-25 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                        @forelse ($benefits as $benefit)
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" name="benefits[]" value="{{ $benefit->id }}" class="rounded border-default bg-skin-backend-secondary">
+                                {{ $benefit->name }}
+                            </label>
+                        @empty
+                            <p class="col-span-full text-sm text-skin-backend-text-base text-opacity-60">Add active benefits first from Jobs > Benefits.</p>
+                        @endforelse
+                    </div>
                 </div>
                 <div class="col-span-12 md:col-span-6">
                     <x-backend.input-label :value="'Deadline'" for="deadline" />
@@ -74,9 +89,14 @@
                 </div>
             </div>
 
-            <button type="submit" class="px-8 py-2.5 bg-skin-backend-accent text-skin-invert rounded-[10px] text-xs font-semibold">
-                Save Job
-            </button>
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" name="submit_action" value="save" class="px-8 py-2.5 bg-skin-backend-accent text-skin-invert rounded-[10px] text-xs font-semibold">
+                    Save Job
+                </button>
+                <button type="submit" name="submit_action" value="draft" formnovalidate class="px-8 py-2.5 border border-default border-opacity-25 text-skin-backend-text-base rounded-[10px] text-xs font-semibold hover:bg-[#323232]">
+                    Save as Draft
+                </button>
+            </div>
         </form>
     </div>
 </div>

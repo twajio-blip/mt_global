@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class JobCountry extends BaseModel
+class JobDesignationCategory extends BaseModel
 {
     use HasFactory;
 
@@ -15,13 +15,8 @@ class JobCountry extends BaseModel
         'is_active' => 'boolean',
     ];
 
-    public function jobs(): HasMany
+    public function designations(): HasMany
     {
-        return $this->hasMany(CountryJob::class);
-    }
-
-    public function locations(): HasMany
-    {
-        return $this->hasMany(JobCountryLocation::class);
+        return $this->hasMany(JobDesignation::class);
     }
 }

@@ -4,22 +4,39 @@ namespace App\Http\Controllers\Backend\Job;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobDesignation;
+use App\Models\JobDesignationCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class JobDesignationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $designations = JobDesignation::withCount('jobs')->orderBy('name')->paginate(10);
+        $search = $request->string('search')->toString();
+        $status = $request->string('status')->toString();
 
-        return view('backend.pages.job.designation.index', compact('designations'));
+        $categories = JobDesignationCategory::where('is_active', true)->orderBy('name')->get();
+        $designations = JobDesignation::with('category')
+            ->withCount('jobs')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%')
+                        ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'like', '%' . $search . '%'));
+                });
+            })
+            ->when(in_array($status, ['active', 'inactive'], true), fn ($query) => $query->where('is_active', $status === 'active'))
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('backend.pages.job.designation.index', compact('designations', 'categories', 'search', 'status'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'job_designation_category_id' => ['required', 'exists:job_designation_categories,id'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
@@ -35,6 +52,7 @@ class JobDesignationController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'job_designation_category_id' => ['required', 'exists:job_designation_categories,id'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 

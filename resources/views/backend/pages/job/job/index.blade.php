@@ -20,12 +20,49 @@
             </div>
 
             <div class="bg-skin-backend-secondary text-skin-backend-text-base p-6 rounded-[10px]">
+                <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    @php
+                        $tabs = [
+                            '' => ['label' => 'All', 'count' => $jobCounts['all'] ?? 0],
+                            'active' => ['label' => 'Active', 'count' => $jobCounts['active'] ?? 0],
+                            'draft' => ['label' => 'Draft', 'count' => $jobCounts['draft'] ?? 0],
+                            'inactive' => ['label' => 'Inactive', 'count' => $jobCounts['inactive'] ?? 0],
+                        ];
+                    @endphp
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($tabs as $tabValue => $tab)
+                            <a
+                                href="{{ route('jobs.jobs.index', array_filter(['status' => $tabValue, 'search' => $search ?? null], fn ($value) => $value !== null && $value !== '')) }}"
+                                class="inline-flex items-center gap-2 rounded-[8px] px-4 py-2 text-xs font-semibold transition-colors {{ ($status ?? '') === $tabValue ? 'bg-skin-backend-accent text-skin-invert' : 'border border-default border-opacity-25 text-skin-backend-text-base hover:bg-[#323232]' }}">
+                                {{ $tab['label'] }}
+                                <span class="rounded bg-black/20 px-1.5 py-0.5 text-[11px] tabular-nums">{{ $tab['count'] }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <form method="GET" action="{{ route('jobs.jobs.index') }}" class="flex w-full gap-2 lg:w-[360px]">
+                        @if (!empty($status))
+                            <input type="hidden" name="status" value="{{ $status }}">
+                        @endif
+                        <input
+                            type="search"
+                            name="search"
+                            value="{{ $search ?? '' }}"
+                            class="min-w-0 flex-1 py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]"
+                            placeholder="Search name, country, designation, employer">
+                        <button type="submit" class="rounded-[8px] bg-skin-backend-accent px-4 py-2 text-xs font-semibold text-skin-invert">
+                            Search
+                        </button>
+                    </form>
+                </div>
+
                 <div class="w-full overflow-x-auto">
                     <table class="min-w-full divide-y divide-[#ffffff06] text-[14px]">
                         <thead class="bg-[#323232] font-bold">
                             <tr>
                                 <th class="py-3 text-start min-w-[160px]"><h2 class="px-6">Title</h2></th>
                                 <th class="py-3 text-start min-w-[140px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Country</h2></th>
+                                <th class="py-3 text-start min-w-[140px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Location</h2></th>
                                 <th class="py-3 text-start min-w-[140px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Designation</h2></th>
                                 <th class="py-3 text-start min-w-[80px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Vacancies</h2></th>
                                 <th class="py-3 text-start min-w-[100px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Status</h2></th>
@@ -37,9 +74,10 @@
                                 <tr>
                                     <td class="py-3 px-6">{{ $job->title }}</td>
                                     <td class="py-3">{{ $job->country?->name }}</td>
+                                    <td class="py-3">{{ $job->countryLocation?->name ?? $job->location }}</td>
                                     <td class="py-3">{{ $job->jobDesignation?->name ?? $job->designation }}</td>
                                     <td class="py-3">{{ $job->vacancies }}</td>
-                                    <td class="py-3">{{ $job->is_active ? 'Active' : 'Inactive' }}</td>
+                                    <td class="py-3">{{ ucfirst($job->status ?? ($job->is_active ? 'active' : 'inactive')) }}</td>
                                     <td class="py-3 text-center">
                                         <div class="inline-flex gap-2">
                                             <button type="button"
@@ -59,7 +97,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-4 py-3 text-center text-gray-500">No job found</td>
+                                    <td colspan="7" class="px-4 py-3 text-center text-gray-500">No job found</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -84,8 +122,33 @@
 <script>
     const createPanel = document.getElementById('create-job-panel');
     const editPanel = document.getElementById('edit-job-panel');
+    @php
+        $jobCountryOptions = $countries->map(fn ($country) => [
+            'id' => $country->id,
+            'name' => $country->name,
+        ])->values();
+        $jobDesignationOptions = $designations->map(fn ($designation) => [
+            'id' => $designation->id,
+            'name' => $designation->name,
+        ])->values();
+        $jobLocationOptions = $locations->map(fn ($location) => [
+            'id' => $location->id,
+            'name' => $location->name,
+            'country_id' => $location->job_country_id,
+            'label' => $location->name . ($location->country ? ' - ' . $location->country->name : ''),
+        ])->values();
+    @endphp
+    const jobComboboxData = {
+        country: @json($jobCountryOptions),
+        designation: @json($jobDesignationOptions),
+        location: @json($jobLocationOptions),
+    };
 
     document.getElementById('open-create-job').addEventListener('click', function() {
+        const createForm = document.getElementById('create-job-form');
+        createForm.reset();
+        createForm.querySelector('[name="is_active"]').checked = true;
+        resetJobComboboxes(createForm);
         createPanel.classList.remove('hidden');
     });
 
@@ -101,19 +164,144 @@
             const form = document.getElementById('edit-job-form');
 
             form.action = "{{ route('jobs.jobs.update', ':id') }}".replace(':id', job.id);
-            form.querySelector('[name="job_country_id"]').value = job.job_country_id || '';
             form.querySelector('[name="title"]').value = job.title || '';
-            form.querySelector('[name="job_designation_id"]').value = job.job_designation_id || '';
-            form.querySelector('[name="location"]').value = job.location || '';
             form.querySelector('[name="employer"]').value = job.employer || '';
             form.querySelector('[name="vacancies"]').value = job.vacancies || '';
             form.querySelector('[name="salary"]').value = job.salary || '';
             form.querySelector('[name="employment_type"]').value = job.employment_type || '';
+            const selectedBenefitIds = (job.benefits || []).map(function(benefit) {
+                return String(benefit.id);
+            });
+            form.querySelectorAll('[name="benefits[]"]').forEach(function(input) {
+                input.checked = selectedBenefitIds.includes(String(input.value));
+            });
             form.querySelector('[name="deadline"]').value = job.deadline ? String(job.deadline).substring(0, 10) : '';
             form.querySelector('[name="short_description"]').value = job.short_description || '';
             form.querySelector('[name="description"]').value = job.description || '';
             form.querySelector('[name="is_active"]').checked = Boolean(job.is_active);
+            setJobComboboxValue(form, 'country', job.job_country_id || '');
+            setJobComboboxValue(form, 'designation', job.job_designation_id || '');
+            setJobComboboxValue(form, 'location', job.job_country_location_id || '');
             editPanel.classList.remove('hidden');
+        });
+    });
+
+    function escapeJobText(value) {
+        return String(value).replace(/[&<>"']/g, function(char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char];
+        });
+    }
+
+    function getJobComboboxRoot(form, type) {
+        return form.querySelector('[data-job-combobox="' + type + '"]');
+    }
+
+    function getJobComboboxItems(form, type) {
+        const items = jobComboboxData[type] || [];
+
+        if (type !== 'location') {
+            return items;
+        }
+
+        const countryValue = form.querySelector('[name="job_country_id"]')?.value || '';
+        return countryValue
+            ? items.filter(function(item) { return String(item.country_id) === String(countryValue); })
+            : items;
+    }
+
+    function setJobComboboxValue(form, type, id) {
+        const root = getJobComboboxRoot(form, type);
+        if (!root) return;
+
+        const hidden = root.querySelector('input[type="hidden"]');
+        const search = root.querySelector('[data-job-combobox-search]');
+        const allItems = jobComboboxData[type] || [];
+        const item = allItems.find(function(entry) {
+            return String(entry.id) === String(id);
+        });
+
+        hidden.value = item ? item.id : '';
+        search.value = item ? (item.label || item.name) : '';
+
+        if (type === 'country') {
+            setJobComboboxValue(form, 'location', '');
+        }
+    }
+
+    function resetJobComboboxes(form) {
+        ['country', 'designation', 'location'].forEach(function(type) {
+            setJobComboboxValue(form, type, '');
+        });
+    }
+
+    function renderJobComboboxOptions(form, root) {
+        const type = root.dataset.jobCombobox;
+        const search = root.querySelector('[data-job-combobox-search]');
+        const options = root.querySelector('[data-job-combobox-options]');
+        const query = search.value.trim().toLowerCase();
+        const items = getJobComboboxItems(form, type).filter(function(item) {
+            const label = item.label || item.name;
+            return query === '' || label.toLowerCase().startsWith(query) || label.toLowerCase().includes(query);
+        });
+
+        options.innerHTML = items.length
+            ? items.map(function(item) {
+                return `<button type="button" data-job-option-id="${item.id}" class="block w-full px-4 py-2 text-left text-sm text-skin-backend-text-base hover:bg-[#323232]">${escapeJobText(item.label || item.name)}</button>`;
+            }).join('')
+            : '<div class="px-4 py-2 text-sm text-skin-backend-text-base text-opacity-50">No option found</div>';
+
+        options.classList.remove('hidden');
+    }
+
+    document.querySelectorAll('[data-job-panel] form').forEach(function(form) {
+        form.querySelectorAll('[data-job-combobox]').forEach(function(root) {
+            const search = root.querySelector('[data-job-combobox-search]');
+            const hidden = root.querySelector('input[type="hidden"]');
+            const options = root.querySelector('[data-job-combobox-options]');
+            const type = root.dataset.jobCombobox;
+
+            search.addEventListener('focus', function() {
+                renderJobComboboxOptions(form, root);
+            });
+
+            search.addEventListener('input', function() {
+                hidden.value = '';
+                renderJobComboboxOptions(form, root);
+            });
+
+            options.addEventListener('click', function(event) {
+                const option = event.target.closest('[data-job-option-id]');
+                if (!option) return;
+
+                const item = (jobComboboxData[type] || []).find(function(entry) {
+                    return String(entry.id) === String(option.dataset.jobOptionId);
+                });
+
+                if (!item) return;
+
+                if (type === 'location' && item.country_id) {
+                    setJobComboboxValue(form, 'country', item.country_id);
+                    setJobComboboxValue(form, 'location', item.id);
+                } else {
+                    setJobComboboxValue(form, type, item.id);
+                }
+
+                options.classList.add('hidden');
+            });
+        });
+    });
+
+    document.addEventListener('click', function(event) {
+        document.querySelectorAll('[data-job-combobox]').forEach(function(root) {
+            if (!root.contains(event.target)) {
+                root.querySelector('[data-job-combobox-options]').classList.add('hidden');
+            }
         });
     });
 </script>

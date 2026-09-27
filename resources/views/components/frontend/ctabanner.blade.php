@@ -1,44 +1,46 @@
 @props(['data' => []])
 
 @php
-    $item = $data[0][0] ?? [];
+    $content = $data[0][0] ?? [];
+    $placeholder = asset('21ea1e0c-a409-4e2b-8c5b-ac92f542fe62.jpg');
+    $image = $placeholder;
 
-    $title = $item['title'] ?? 'Ready to Elevate Your Building?';
-    $subtitle = $item['subtitle'] ?? 'Get a free consultation and quote for your next project. Our experts are ready to provide the perfect vertical mobility solution tailored to your needs.';
-    $btn_text = $item['btn_text'] ?? 'Get Free Quote';
-    $btn_link = $item['btn_link'] ?? 'contact';
+    if (!empty($content['image'])) {
+        $imagePath = ltrim($content['image'], '/');
+        $image = \Illuminate\Support\Str::startsWith($imagePath, ['http://', 'https://'])
+            ? $imagePath
+            : asset('images/' . $imagePath);
+    }
 @endphp
 
-<section class="relative py-16 lg:py-24 bg-brand-charcoal overflow-hidden">
+<section class="py-16 lg:py-24 bg-white" aria-labelledby="cta-title">
+    <div class="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+        <div class="grid overflow-hidden rounded-2xl bg-[#1F4580] lg:grid-cols-2">
+            <div class="p-8 sm:p-12 lg:p-14">
+                <h2 id="cta-title" class="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                    {{ $content['title'] ?? '' }}
+                </h2>
 
-    <!-- Angled Background -->
-    <div class="absolute inset-0 pointer-events-none z-0">
-        <div class="absolute -top-[50%] -right-[10%] w-[50%] h-[200%] bg-brand-red/10 rotate-12"></div>
-        <div class="absolute -bottom-[50%] -left-[10%] w-[30%] h-[200%] bg-white/5 -rotate-12"></div>
-    </div>
+                <p class="mt-4 max-w-md text-base leading-relaxed text-[#D9E3F2]">
+                    {{ $content['subtitle'] ?? '' }}
+                </p>
 
-    <!-- Content -->
-    <div class="max-w-4xl mx-auto px-4 relative z-10 text-center">
-        <div data-aos="zoom-in" data-aos-duration="500" data-aos-once="true">
+                <a
+                    href="{{ url($content['btn_link'] ?? '#') }}"
+                    class="mt-8 inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#0E8A5B] px-5 text-[15px] font-semibold text-white transition-[background-color,transform] duration-150 ease-out hover:bg-[#0B6F49] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#BFE7D7]"
+                >
+                    {{ $content['btn_text'] ?? '' }}
+                    <i class="fa-solid fa-arrow-right text-sm" aria-hidden="true"></i>
+                </a>
+            </div>
 
-            <h2 class="text-size-title leading-[1.1] font-heading font-bold text-white mb-6">
-                {{ $title }}
-            </h2>
-
-            <p class="text-size-body text-gray-300 mb-10 max-w-2xl mx-auto">
-                {{ $subtitle }}
-            </p>
-
-            <a href="{{ url($btn_link) }}"
-                class="text-size-sub-header inline-flex items-center px-8 py-4 bg-brand-red text-white rounded-lg font-bold hover:bg-white hover:text-brand-red transition-all duration-300 shadow-lg hover:shadow-xl group">
-
-                {{ $btn_text }}
-
-                <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-
-            </a>
-
+            <img
+                src="{{ $image }}"
+                alt="{{ $content['title'] ?? 'CTA banner' }}"
+                loading="lazy"
+                class="h-64 w-full object-cover lg:h-full"
+                onerror="this.onerror=null; this.src='{{ $placeholder }}';"
+            >
         </div>
     </div>
-
 </section>
