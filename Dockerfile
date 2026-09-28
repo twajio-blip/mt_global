@@ -33,4 +33,4 @@ RUN sed -i 's/^Listen .*/Listen 10000/' /etc/apache2/ports.conf \
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "apache2ctl -DFOREGROUND"]
+CMD ["apache2-foreground"]
