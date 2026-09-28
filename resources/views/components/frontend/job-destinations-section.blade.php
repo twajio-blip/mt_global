@@ -13,20 +13,6 @@
     $sectionTitle = $sectionData['Title'] ?? 'Popular Job Destinations';
     $sectionSubtitle = $sectionData['Subtitle'] ?? 'Choose a country to see every open manpower requirement there.';
 
-    $countryCodes = [
-        'Saudi Arabia' => 'sa',
-        'UAE' => 'ae',
-        'Qatar' => 'qa',
-        'Kuwait' => 'kw',
-        'Oman' => 'om',
-        'Bahrain' => 'bh',
-        'Malaysia' => 'my',
-        'Singapore' => 'sg',
-        'Romania' => 'ro',
-        'Croatia' => 'hr',
-        'Poland' => 'pl',
-    ];
-
     $summaries = \App\Models\JobCountry::query()
         ->where('is_active', true)
         ->withCount(['jobs as jobs_count' => fn ($query) => $query->where('is_active', true)])
@@ -61,7 +47,7 @@
         <ul class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
             @forelse ($featured as $country)
                 @php
-                    $flagCode = $countryCodes[$country->name] ?? null;
+                    $flagCode = $country->flag_code;
                     $vacancies = (int) ($country->vacancies_count ?? 0);
                 @endphp
 
@@ -100,7 +86,7 @@
                 <span class="mr-1 text-[#64748B]">Also hiring in</span>
 
                 @foreach ($others as $country)
-                    @php $flagCode = $countryCodes[$country->name] ?? null; @endphp
+                    @php $flagCode = $country->flag_code; @endphp
                     <a
                         href="{{ url('/jobs?country=' . urlencode($country->slug)) }}"
                         class="flex items-center gap-2 rounded-full border border-[#E2E8F0] px-3 py-1.5 font-medium text-[#0F1B2D] transition-colors duration-150 ease-out hover:border-[#B9CCE7] hover:text-[#1F4580]">

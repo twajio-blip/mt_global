@@ -37,6 +37,11 @@ class CountryJob extends BaseModel
         return $this->belongsTo(JobDesignation::class, 'job_designation_id');
     }
 
+    public function employmentType(): BelongsTo
+    {
+        return $this->belongsTo(JobEmploymentType::class, 'job_employment_type_id');
+    }
+
     public function benefits(): BelongsToMany
     {
         return $this->belongsToMany(JobBenefit::class, 'country_job_benefit')->withTimestamps();

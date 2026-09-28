@@ -1,5 +1,5 @@
 <x-Deshboard-layout>
-    <div class="py-10">
+    <div class="py-10 job-admin-fields">
         <div class="space-y-4">
             <div class="md:flex md:justify-between md:items-center space-y-4 md:space-y-0">
                 <div class="space-y-2 max-w-[350px] text-skin-backend-text-base">
@@ -60,35 +60,57 @@
                     <table class="min-w-full divide-y divide-[#ffffff06] text-[14px]">
                         <thead class="bg-[#323232] font-bold">
                             <tr>
-                                <th class="py-3 text-start min-w-[160px]"><h2 class="px-6">Title</h2></th>
+                                <th class="py-3 text-start min-w-[180px]"><h2 class="px-6">Job Title</h2></th>
                                 <th class="py-3 text-start min-w-[140px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Country</h2></th>
-                                <th class="py-3 text-start min-w-[140px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Location</h2></th>
-                                <th class="py-3 text-start min-w-[140px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Designation</h2></th>
-                                <th class="py-3 text-start min-w-[80px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Vacancies</h2></th>
+                                <th class="py-3 text-start min-w-[150px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Designation</h2></th>
+                                <th class="py-3 text-start min-w-[160px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Employer</h2></th>
+                                <th class="py-3 text-right min-w-[90px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Vacancy</h2></th>
+                                <th class="py-3 text-start min-w-[120px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Published</h2></th>
                                 <th class="py-3 text-start min-w-[100px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Status</h2></th>
+                                <th class="py-3 text-right min-w-[70px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">CVs</h2></th>
                                 <th class="py-3 text-center w-[100px]"><h2 class="px-4 border-l border-default border-opacity-[6%]">Action</h2></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#ffffff06]">
                             @forelse ($jobs as $job)
                                 <tr>
-                                    <td class="py-3 px-6">{{ $job->title }}</td>
+                                    <td class="py-3 px-6 font-medium">{{ $job->title }}</td>
                                     <td class="py-3">{{ $job->country?->name }}</td>
-                                    <td class="py-3">{{ $job->countryLocation?->name ?? $job->location }}</td>
                                     <td class="py-3">{{ $job->jobDesignation?->name ?? $job->designation }}</td>
-                                    <td class="py-3">{{ $job->vacancies }}</td>
+                                    <td class="py-3 max-w-[180px] truncate" title="{{ $job->employer }}">{{ $job->employer }}</td>
+                                    <td class="py-3 px-4 text-right tabular-nums">{{ $job->vacancies }}</td>
+                                    <td class="py-3 whitespace-nowrap">{{ $job->created_at?->format('M d, Y') }}</td>
                                     <td class="py-3">{{ ucfirst($job->status ?? ($job->is_active ? 'active' : 'inactive')) }}</td>
+                                    <td class="py-3 px-4 text-right tabular-nums">0</td>
                                     <td class="py-3 text-center">
-                                        <div class="inline-flex gap-2">
+                                        <div class="inline-flex items-center justify-end gap-1">
+                                            <a href="{{ route('job.view', $job->id) }}" target="_blank"
+                                                class="inline-flex items-center justify-center w-[26px] h-[26px] rounded-full border border-default border-opacity-25 text-skin-backend-text-base hover:bg-[#323232]"
+                                                title="View" aria-label="View {{ $job->title }}">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
                                             <button type="button"
-                                                class="edit-job inline-flex items-center justify-center w-[26px] h-[26px] rounded-full bg-[#3762ED]"
+                                                class="edit-job inline-flex items-center justify-center w-[26px] h-[26px] rounded-full border border-default border-opacity-25 text-skin-backend-text-base hover:bg-[#323232]"
+                                                title="Edit" aria-label="Edit {{ $job->title }}"
                                                 data-job='@json($job)'>
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
+                                            <form action="{{ route('jobs.jobs.toggle-status', $job) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="inline-flex items-center justify-center w-[26px] h-[26px] rounded-full border border-default border-opacity-25 {{ ($job->status ?? null) === 'active' ? 'text-skin-backend-accent-text' : 'text-skin-backend-text-base' }} hover:bg-[#323232]"
+                                                    title="{{ ($job->status ?? null) === 'active' ? 'Deactivate' : 'Activate' }}"
+                                                    aria-label="{{ ($job->status ?? null) === 'active' ? 'Deactivate' : 'Activate' }} {{ $job->title }}">
+                                                    <i class="fa-solid fa-power-off"></i>
+                                                </button>
+                                            </form>
                                             <form action="{{ route('jobs.jobs.destroy', $job) }}" method="POST" onsubmit="return confirm('Delete this job?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center justify-center w-[26px] h-[26px] rounded-full bg-[#E61714]">
+                                                <button type="submit"
+                                                    class="inline-flex items-center justify-center w-[26px] h-[26px] rounded-full border border-default border-opacity-25 text-[#E61714] hover:bg-[#323232]"
+                                                    title="Delete" aria-label="Delete {{ $job->title }}">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </button>
                                             </form>
@@ -97,7 +119,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-4 py-3 text-center text-gray-500">No job found</td>
+                                    <td colspan="9" class="px-4 py-3 text-center text-gray-500">No job found</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -137,17 +159,22 @@
             'country_id' => $location->job_country_id,
             'label' => $location->name . ($location->country ? ' - ' . $location->country->name : ''),
         ])->values();
+        $jobEmploymentTypeOptions = $employmentTypes->map(fn ($employmentType) => [
+            'id' => $employmentType->id,
+            'name' => $employmentType->name,
+        ])->values();
     @endphp
     const jobComboboxData = {
         country: @json($jobCountryOptions),
         designation: @json($jobDesignationOptions),
         location: @json($jobLocationOptions),
+        employmentType: @json($jobEmploymentTypeOptions),
     };
 
     document.getElementById('open-create-job').addEventListener('click', function() {
         const createForm = document.getElementById('create-job-form');
         createForm.reset();
-        createForm.querySelector('[name="is_active"]').checked = true;
+        setJobRadioValue(createForm, 'status', 'active');
         resetJobComboboxes(createForm);
         createPanel.classList.remove('hidden');
     });
@@ -155,6 +182,14 @@
     document.querySelectorAll('[data-close-job-panel]').forEach(function(button) {
         button.addEventListener('click', function() {
             button.closest('[data-job-panel]').classList.add('hidden');
+        });
+    });
+
+    document.querySelectorAll('[data-job-panel]').forEach(function(panel) {
+        panel.addEventListener('click', function(event) {
+            if (event.target === panel) {
+                panel.classList.add('hidden');
+            }
         });
     });
 
@@ -168,20 +203,32 @@
             form.querySelector('[name="employer"]').value = job.employer || '';
             form.querySelector('[name="vacancies"]').value = job.vacancies || '';
             form.querySelector('[name="salary"]').value = job.salary || '';
-            form.querySelector('[name="employment_type"]').value = job.employment_type || '';
+            form.querySelector('[name="contract_duration"]').value = job.contract_duration || '';
+            form.querySelector('[name="working_hours"]').value = job.working_hours || '';
+            form.querySelector('[name="overtime"]').value = job.overtime || '';
+            form.querySelector('[name="experience"]').value = job.experience || '';
+            form.querySelector('[name="education"]').value = job.education || '';
+            form.querySelector('[name="age"]').value = job.age || '';
+            form.querySelector('[name="gender"]').value = job.gender || '';
             const selectedBenefitIds = (job.benefits || []).map(function(benefit) {
                 return String(benefit.id);
             });
             form.querySelectorAll('[name="benefits[]"]').forEach(function(input) {
                 input.checked = selectedBenefitIds.includes(String(input.value));
             });
+            form.querySelector('[name="visa_type"]').value = job.visa_type || '';
+            form.querySelector('[name="visa_info"]').value = job.visa_info || '';
             form.querySelector('[name="deadline"]').value = job.deadline ? String(job.deadline).substring(0, 10) : '';
             form.querySelector('[name="short_description"]').value = job.short_description || '';
             form.querySelector('[name="description"]').value = job.description || '';
-            form.querySelector('[name="is_active"]').checked = Boolean(job.is_active);
+            form.querySelector('[name="responsibilities"]').value = job.responsibilities || '';
+            form.querySelector('[name="requirements"]').value = job.requirements || '';
+            form.querySelector('[name="additional_info"]').value = job.additional_info || '';
+            setJobRadioValue(form, 'status', job.status === 'inactive' ? 'inactive' : 'active');
             setJobComboboxValue(form, 'country', job.job_country_id || '');
             setJobComboboxValue(form, 'designation', job.job_designation_id || '');
             setJobComboboxValue(form, 'location', job.job_country_location_id || '');
+            setJobComboboxValue(form, 'employmentType', job.job_employment_type_id || '');
             editPanel.classList.remove('hidden');
         });
     });
@@ -200,6 +247,12 @@
 
     function getJobComboboxRoot(form, type) {
         return form.querySelector('[data-job-combobox="' + type + '"]');
+    }
+
+    function setJobRadioValue(form, name, value) {
+        form.querySelectorAll('[name="' + name + '"]').forEach(function(input) {
+            input.checked = input.value === value;
+        });
     }
 
     function getJobComboboxItems(form, type) {
@@ -235,7 +288,7 @@
     }
 
     function resetJobComboboxes(form) {
-        ['country', 'designation', 'location'].forEach(function(type) {
+        ['country', 'designation', 'location', 'employmentType'].forEach(function(type) {
             setJobComboboxValue(form, type, '');
         });
     }

@@ -199,6 +199,20 @@
     background-color: rgb(var(--color-backend-background-accent) / 0.3);
   }
 
+  .job-admin-fields input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+  .job-admin-fields textarea,
+  .job-admin-fields select {
+    color: rgb(var(--color-backend-text-base));
+    font-weight: 400;
+  }
+
+  .job-admin-fields input::placeholder,
+  .job-admin-fields textarea::placeholder {
+    color: rgb(var(--color-backend-text-base) / 0.15);
+    font-weight: 300;
+    opacity: 1;
+  }
+
   .remove-group,
   .remove-sub-row {
     display: inline-flex;

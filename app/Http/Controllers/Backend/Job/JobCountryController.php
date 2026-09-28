@@ -35,12 +35,14 @@ class JobCountryController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'flag_code' => ['nullable', 'string', 'size:2'],
             'locations' => ['nullable', 'array'],
             'locations.*' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $data['slug'] = $this->uniqueSlug($data['name']);
+        $data['flag_code'] = $data['flag_code'] ? Str::lower($data['flag_code']) : null;
         $data['is_active'] = $request->boolean('is_active');
         $locations = $data['locations'] ?? [];
         unset($data['locations']);
@@ -55,12 +57,14 @@ class JobCountryController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'flag_code' => ['nullable', 'string', 'size:2'],
             'locations' => ['nullable', 'array'],
             'locations.*' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $data['slug'] = $this->uniqueSlug($data['name'], $country->id);
+        $data['flag_code'] = $data['flag_code'] ? Str::lower($data['flag_code']) : null;
         $data['is_active'] = $request->boolean('is_active');
         $locations = $data['locations'] ?? [];
         unset($data['locations']);

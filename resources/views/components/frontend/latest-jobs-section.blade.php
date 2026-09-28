@@ -1,20 +1,6 @@
 @props(['data' => []])
 
 @php
-    $countryCodes = [
-        'Saudi Arabia' => 'sa',
-        'UAE' => 'ae',
-        'Qatar' => 'qa',
-        'Kuwait' => 'kw',
-        'Oman' => 'om',
-        'Bahrain' => 'bh',
-        'Malaysia' => 'my',
-        'Singapore' => 'sg',
-        'Romania' => 'ro',
-        'Croatia' => 'hr',
-        'Poland' => 'pl',
-    ];
-
     $jobs = \App\Models\CountryJob::query()
         ->where('is_active', true)
         ->with(['country', 'jobDesignation'])
@@ -36,7 +22,7 @@
             @forelse ($jobs as $job)
                 @php
                     $countryName = $job->country?->name ?? 'Overseas';
-                    $flagCode = $countryCodes[$countryName] ?? null;
+                    $flagCode = $job->country?->flag_code;
                     $designation = $job->jobDesignation?->name ?? $job->designation;
                     $vacancies = (int) ($job->vacancies ?: 0);
                     $publishedAt = $job->created_at?->diffForHumans();

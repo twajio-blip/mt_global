@@ -15,6 +15,7 @@ use App\Http\Controllers\Backend\Job\CountryJobController;
 use App\Http\Controllers\Backend\Job\JobBenefitController;
 use App\Http\Controllers\Backend\Job\JobDesignationCategoryController;
 use App\Http\Controllers\Backend\Job\JobDesignationController;
+use App\Http\Controllers\Backend\Job\JobEmploymentTypeController;
 use App\Http\Controllers\Backend\Job\JobCountryController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\Pages\PagesController;
@@ -67,6 +68,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::resource('categories', JobDesignationCategoryController::class)->except(['create', 'show', 'edit']);
         Route::resource('designations', JobDesignationController::class)->except(['create', 'show', 'edit']);
         Route::resource('benefits', JobBenefitController::class)->except(['create', 'show', 'edit']);
+        Route::resource('employment-types', JobEmploymentTypeController::class)->except(['create', 'show', 'edit']);
+        Route::patch('jobs/{job}/toggle-status', [CountryJobController::class, 'toggleStatus'])->name('jobs.toggle-status');
         Route::resource('jobs', CountryJobController::class)->except(['create', 'show', 'edit']);
     });
 

@@ -1,5 +1,5 @@
 <x-Deshboard-layout>
-    <div class="py-10">
+    <div class="py-10 job-admin-fields">
         <div class="space-y-4">
             <div class="md:flex md:justify-between md:items-center space-y-4 md:space-y-0">
                 <div class="space-y-2 max-w-[350px] text-skin-backend-text-base">
@@ -38,11 +38,14 @@
                             <input type="search" name="search" value="{{ $search ?? '' }}" class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]" placeholder="Search benefit">
                         </div>
                         <div class="col-span-12 md:col-span-3">
-                            <select name="status" class="py-2 px-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]">
+                            <div class="relative">
+                                <i class="fa-solid fa-chevron-down pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[11px] text-skin-backend-text-base text-opacity-50"></i>
+                                <select name="status" class="py-2 pl-9 pr-3 block w-full text-sm bg-skin-backend-secondary border focus:outline-none focus:border-highlight focus:ring-0 border-default border-opacity-25 text-skin-backend-text-base rounded-[4px]">
                                 <option value="">All status</option>
                                 <option value="active" @selected(($status ?? '') === 'active')>Active</option>
                                 <option value="inactive" @selected(($status ?? '') === 'inactive')>Inactive</option>
-                            </select>
+                                </select>
+                            </div>
                         </div>
                         <div class="col-span-12 md:col-span-3 flex gap-2">
                             <button type="submit" class="flex-1 rounded-[8px] bg-skin-backend-accent px-4 py-2 text-xs font-semibold text-skin-invert">Filter</button>
@@ -98,7 +101,7 @@
         </div>
     </div>
 
-    <div id="edit-benefit-panel" class="hidden fixed inset-0 z-[100] bg-black/60 p-4">
+    <div id="edit-benefit-panel" class="job-admin-fields hidden fixed inset-0 z-[100] bg-black/60 p-4">
         <div class="mx-auto mt-20 max-w-xl bg-skin-backend-secondary text-skin-backend-text-base p-6 rounded-[10px]">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-semibold">Edit Benefit</h3>
