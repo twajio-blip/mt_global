@@ -35,7 +35,7 @@
 @endphp
 
 <section class="bg-[#F8FAFC] py-16 lg:py-24" aria-labelledby="professions-title">
-    <div class="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+    <div class="container">
         <h2 id="professions-title" class="text-3xl font-bold tracking-tight text-[#0F1B2D] md:text-4xl">
             {{ $sectionTitle }}
         </h2>

@@ -43,7 +43,7 @@
         <!-- side bar starts-->
         <div class="fixed overlay w-fit h-full bg-black bg-opacity-20 z-40 md:w-fit">
             <aside
-                class="sidebar sidebar-active fixed top-0 left-0 w-[85vw] sm:w-[50vw] md:w-[270px] transition-all duration-[400ms] h-screen bg-skin-backend-secondary z-50 -translate-x-[110%] md:-translate-x-0">
+                class="sidebar sidebar-active fixed top-0 left-0 w-[85vw] sm:w-[50vw] md:w-[270px] transition-all duration-[400ms] h-screen bg-background z-50 -translate-x-[110%] md:-translate-x-0">
                 <!-- Logo -->
                 <div class="flex items-center justify-between gap-4 h-[60px] text-lg text-white font-semibold px-4 py-6">
                     <a href="#" class="flex items-center gap-2">

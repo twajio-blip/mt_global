@@ -108,7 +108,7 @@
             {{-- Job Search --}}
             <div class="bg-white shadow-[0_2px_4px_rgba(15,27,45,0.06),0_12px_28px_rgba(15,27,45,0.10)] mt-8 p-3 sm:p-4 rounded-2xl max-w-2xl">
 
-                <form action="#" method="GET" class="gap-3 grid md:grid-cols-[1fr_1fr_auto]">
+                <form action="{{ url('/jobs') }}" method="GET" class="gap-3 grid md:grid-cols-[1fr_1fr_auto]">
 
                     {{-- Country --}}
                     <label class="block">
@@ -182,7 +182,10 @@
                 @forelse ($popularJobs as $job)
 
                     <a
-                        href="#"
+                        href="{{ url('/jobs?' . http_build_query(array_filter([
+                            'country' => $job->country?->slug,
+                            'designation' => $job->jobDesignation?->slug,
+                        ]))) }}"
                         class="px-3 py-1 border border-white/20 hover:border-white/50 rounded-full text-white transition-colors duration-150 ease-out"
                     >
                         {{ $job->jobDesignation?->name ?? $job->designation }}

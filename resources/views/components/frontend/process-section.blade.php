@@ -18,7 +18,7 @@
 @endphp
 
 <section class="border-y border-[#E2E8F0] bg-white py-16 lg:py-24" aria-labelledby="process-title">
-    <div class="mx-auto grid w-full max-w-[1240px] gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
+    <div class="container grid gap-12 lg:grid-cols-12 ">
         <div class="lg:col-span-5">
             <h2 id="process-title" class="text-3xl font-bold tracking-tight text-[#0F1B2D] md:text-4xl">
                 Find and Apply for Overseas Jobs Easily

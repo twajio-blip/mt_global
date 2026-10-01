@@ -57,7 +57,7 @@
   --color-tag-text-color: var(--tag-text-color);
   --color-btn-primary: var(--btn-primary);
   --color-btn-primary-hover: var(--btn-primary-hover);
-
+  --color-brand-red: var(--brand-red);
   --container-310: 77.5rem; /* 1240px */
   --spacing-xsmall: 0.25rem; /* 4px */
   --spacing-small: 0.725rem; /* 11.6px */

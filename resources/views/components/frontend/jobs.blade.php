@@ -167,85 +167,97 @@
                     @php
                         $country = $job->country;
                         $designation = $job->jobDesignation?->name ?? $job->designation;
-                        $benefits = $job->benefits->pluck('name')->take(3);
+                        $benefits = $job->benefits
+                            ->filter(fn ($benefit) => in_array($benefit->name, ['Accommodation', 'Food', 'Air Ticket'], true))
+                            ->pluck('name')
+                            ->take(3);
+                        $location = $job->countryLocation?->name ?? $job->location;
                     @endphp
 
                     <li>
-                        <a href="{{ route('job.view', $job->id) }}" class="group block rounded-xl border border-[#E2E8F0] bg-white p-5 transition-[border-color,box-shadow] hover:border-[#B9CCE7] hover:shadow-[0_10px_24px_rgba(15,27,45,0.10)]">
-                            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                                <div class="min-w-0">
-                                    <div class="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1F4580]">
-                                        @if ($country?->flag_code)
-                                            <img src="https://flagcdn.com/w40/{{ $country->flag_code }}.png" alt="" aria-hidden="true" loading="lazy" class="h-4 w-6 rounded-[2px] object-cover ring-1 ring-black/10">
-                                        @endif
-                                        <span>{{ $country?->name ?? 'Overseas' }}</span>
-                                        @if ($job->countryLocation?->name ?? $job->location)
-                                            <span class="text-[#CBD5E1]">/</span>
-                                            <span>{{ $job->countryLocation?->name ?? $job->location }}</span>
+                        <article class="group relative rounded-xl border border-[#E2E8F0] bg-white p-5 transition-[border-color,box-shadow] duration-200 ease-out hover:border-[#B9CCE7] hover:shadow-[0_10px_24px_rgba(15,27,45,0.10)] md:p-6">
+                            <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                                        <span class="flex items-center gap-2 font-semibold text-[#1F4580]">
+                                            @if ($country?->flag_code)
+                                                <img src="https://flagcdn.com/w40/{{ $country->flag_code }}.png" alt="" aria-hidden="true" loading="lazy" class="h-4 w-6 rounded-[2px] object-cover ring-1 ring-black/10">
+                                            @endif
+                                            {{ $country?->name ?? 'Overseas' }}
+                                        </span>
+
+                                        @if ($location)
+                                            <span class="flex items-center gap-1 text-[#64748B]">
+                                                <i class="fa-solid fa-location-dot text-[13px] text-[#94A3B8]" aria-hidden="true"></i>
+                                                {{ $location }}
+                                            </span>
                                         @endif
                                     </div>
 
-                                    <h2 class="mt-2 text-xl font-semibold text-[#0F1B2D] transition-colors group-hover:text-[#1F4580]">
-                                        {{ $job->title }}
+                                    <h2 class="mt-2 text-lg font-semibold leading-snug text-[#0F1B2D] md:text-xl">
+                                        <a href="{{ route('job.view', $job->id) }}" class="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none group-hover:text-[#1F4580]">
+                                            {{ $job->title }}
+                                        </a>
                                     </h2>
 
-                                    <p class="mt-1 text-sm text-[#64748B]">
-                                        {{ $designation }}
+                                    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-[#475569]">
                                         @if ($job->employer)
-                                            <span class="mx-1">/</span>{{ $job->employer }}
+                                            <span class="flex items-center gap-1.5">
+                                                <i class="fa-regular fa-building text-base text-[#94A3B8]" aria-hidden="true"></i>
+                                                {{ $job->employer }}
+                                            </span>
                                         @endif
-                                    </p>
+
+                                        <span class="flex items-center gap-1.5">
+                                            <i class="fa-solid fa-briefcase text-sm text-[#94A3B8]" aria-hidden="true"></i>
+                                            {{ $designation }}
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                                        @if ($job->visa_type)
+                                            <span class="flex items-center gap-1.5 rounded-md bg-[#EAF2FF] px-2 py-1 text-[13px] font-medium text-[#1F4580]">
+                                                <i class="fa-solid fa-stamp text-[13px]" aria-hidden="true"></i>
+                                                {{ $job->visa_type }}
+                                            </span>
+                                        @endif
+
+                                        @if ($benefits->isNotEmpty())
+                                            <ul class="flex flex-wrap gap-x-3 gap-y-1" aria-label="Facilities provided">
+                                                @foreach ($benefits as $benefit)
+                                                    <li class="flex items-center gap-1 text-[13px] text-[#0E8A5B]">
+                                                        <i class="fa-solid fa-check text-[12px]" aria-hidden="true"></i>
+                                                        {{ $benefit }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
                                 </div>
 
-                                <div class="shrink-0 rounded-lg bg-[#ECFDF5] px-3 py-2 text-right">
-                                    <p class="text-sm font-semibold text-[#0E8A5B]">{{ number_format((int) $job->vacancies) }}</p>
-                                    <p class="text-xs text-[#64748B]">{{ \Illuminate\Support\Str::plural('vacancy', (int) $job->vacancies) }}</p>
+                                <div class="flex items-end justify-between gap-4 border-t border-[#E2E8F0] pt-4 md:w-56 md:flex-col md:items-end md:border-0 md:pt-0 md:text-right">
+                                    <div>
+                                        @if ($job->salary)
+                                            <p class="text-base font-semibold text-[#0E8A5B]">{{ $job->salary }}</p>
+                                        @else
+                                            <p class="text-sm text-[#64748B]">Salary on request</p>
+                                        @endif
+
+                                        <p class="mt-1 flex items-center gap-1.5 text-sm text-[#334155] md:justify-end">
+                                            <i class="fa-solid fa-users text-sm text-[#94A3B8]" aria-hidden="true"></i>
+                                            {{ number_format((int) $job->vacancies) }} {{ \Illuminate\Support\Str::plural('vacancy', (int) $job->vacancies) }}
+                                        </p>
+                                    </div>
+
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="text-[13px] text-[#64748B]">{{ $job->created_at?->diffForHumans() }}</span>
+                                        <span class="inline-flex h-10 items-center rounded-lg bg-[#1F4580] px-4 text-sm font-semibold text-white transition-colors duration-150 ease-out group-hover:bg-[#0B1F3A]">
+                                            View Details
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-
-                            <dl class="mt-4 grid gap-3 border-t border-[#E2E8F0] pt-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                                @if ($job->salary)
-                                    <div>
-                                        <dt class="text-[13px] text-[#64748B]">Salary</dt>
-                                        <dd class="mt-0.5 font-semibold text-[#0E8A5B]">{{ $job->salary }}</dd>
-                                    </div>
-                                @endif
-
-                                @if ($job->employment_type)
-                                    <div>
-                                        <dt class="text-[13px] text-[#64748B]">Employment Type</dt>
-                                        <dd class="mt-0.5 font-medium text-[#0F1B2D]">{{ $job->employment_type }}</dd>
-                                    </div>
-                                @endif
-
-                                @if ($job->deadline)
-                                    <div>
-                                        <dt class="text-[13px] text-[#64748B]">Deadline</dt>
-                                        <dd class="mt-0.5 font-medium text-[#0F1B2D]">{{ $job->deadline->format('M d, Y') }}</dd>
-                                    </div>
-                                @endif
-
-                                <div>
-                                    <dt class="text-[13px] text-[#64748B]">Published</dt>
-                                    <dd class="mt-0.5 font-medium text-[#0F1B2D]">{{ $job->created_at?->diffForHumans() }}</dd>
-                                </div>
-                            </dl>
-
-                            @if ($benefits->isNotEmpty())
-                                <div class="mt-4 flex flex-wrap gap-2">
-                                    @foreach ($benefits as $benefit)
-                                        <span class="rounded-full bg-[#F1F5F9] px-3 py-1 text-xs font-medium text-[#475569]">{{ $benefit }}</span>
-                                    @endforeach
-                                </div>
-                            @endif
-
-                            <div class="mt-4 flex justify-end">
-                                <span class="flex items-center gap-1 text-sm font-semibold text-[#1F4580]">
-                                    View Details
-                                    <i class="fa-solid fa-arrow-right text-sm transition-transform group-hover:translate-x-0.5"></i>
-                                </span>
-                            </div>
-                        </a>
+                        </article>
                     </li>
                 @endforeach
             </ul>

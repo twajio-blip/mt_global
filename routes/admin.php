@@ -13,6 +13,7 @@ use App\Http\Controllers\Backend\Gallery\GalleryCategoryController;
 use App\Http\Controllers\Backend\Gallery\GalleryImageController;
 use App\Http\Controllers\Backend\Job\CountryJobController;
 use App\Http\Controllers\Backend\Job\JobBenefitController;
+use App\Http\Controllers\Backend\Job\JobApplicationController;
 use App\Http\Controllers\Backend\Job\JobDesignationCategoryController;
 use App\Http\Controllers\Backend\Job\JobDesignationController;
 use App\Http\Controllers\Backend\Job\JobEmploymentTypeController;
@@ -72,6 +73,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
         Route::patch('jobs/{job}/toggle-status', [CountryJobController::class, 'toggleStatus'])->name('jobs.toggle-status');
         Route::resource('jobs', CountryJobController::class)->except(['create', 'show', 'edit']);
     });
+
+    Route::resource('cvs', JobApplicationController::class)->only(['index', 'destroy']);
 
     // Gallery Route
     Route::prefix('gallery')->name('gallery.')->group(function () {

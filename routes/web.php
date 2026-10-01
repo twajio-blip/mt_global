@@ -42,6 +42,7 @@ Route::middleware(['visitor'])->group(function () {
     Route::get('list/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'listView'])->name('list.view');
     Route::get('news/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'blogView'])->name('article.view');
     Route::get('job/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'jobView'])->name('job.view');
+    Route::post('job/{job}/apply', [PageController::class, 'jobApply'])->name('job.apply');
     Route::get('gallery/view/{id}', [PageController::class, 'galleryView'])->name('gallery.view');
 
     Route::post('contact/store', [PageController::class, 'contactStore'])->name('contact.store.frontend');

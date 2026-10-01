@@ -27,7 +27,7 @@
 @endphp
 
 <section class="py-16 lg:py-24 bg-white" aria-labelledby="destinations-title">
-    <div class="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+    <div class="container">
         <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
                 <h2 id="destinations-title" class="text-3xl font-bold tracking-tight text-[#0F1B2D] md:text-4xl">

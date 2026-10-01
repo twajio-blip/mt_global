@@ -10,7 +10,7 @@
 @endphp
 
 <section class="py-16 lg:py-24 bg-white" aria-labelledby="latest-title">
-    <div class="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+    <div class="container">
         <h2 id="latest-title" class="text-3xl font-bold tracking-tight text-[#0F1B2D] md:text-4xl">
             Latest Overseas Job Opportunities
         </h2>

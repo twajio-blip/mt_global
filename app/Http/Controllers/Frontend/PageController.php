@@ -7,19 +7,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Contact\ContactRequest;
 use App\Models\BlogPost;
 use App\Models\Career;
+use App\Models\CountryJob;
 use App\Models\ComponentField;
 use App\Models\ComponentMaster;
 use App\Models\Contact;
 use App\Models\GalleryImage;
+use App\Models\AllCv;
 use App\Models\Page;
 use App\Models\Services;
 use App\Models\Subscriber;
 use App\Services\Notifications\Notifications;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class PageController extends Controller
@@ -655,12 +659,71 @@ class PageController extends Controller
         return view('test-list-view', compact('blog', 'blogs', 'page', 'relatedBlogs'));
     }
 
-    public function jobView($id, $current_page_id)
+    public function jobView($id, $current_page_id = null)
     {
-        $page = Page::where('id', $current_page_id)->where('status', 1)->first();
-        $career = Career::where('id', $id)->with('category')->first();
+        $page = $current_page_id
+            ? Page::where('id', $current_page_id)->where('status', 1)->first()
+            : Page::where('permalink', 'jobs')->where('status', 1)->first();
+        $page ??= Page::where('permalink', '/')->where('status', 1)->first();
+        $job = CountryJob::with(['country', 'countryLocation', 'jobDesignation', 'benefits'])
+            ->findOrFail($id);
+        $relatedJobs = CountryJob::with(['country', 'countryLocation'])
+            ->where('is_active', true)
+            ->where('id', '!=', $job->id)
+            ->when($job->job_country_id, fn ($query) => $query->where('job_country_id', $job->job_country_id))
+            ->latest()
+            ->take(3)
+            ->get();
 
-        return view('jobView', compact('career', 'page'));
+        return view('job-view', compact('job', 'relatedJobs', 'page'));
+    }
+
+    public function jobApply(Request $request, CountryJob $job)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:80'],
+            'email' => ['required', 'email', 'max:255'],
+            'current_location' => ['required', 'string', 'max:255'],
+            'message' => ['nullable', 'string'],
+            'cv' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'consent' => ['accepted'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect(url()->previous() . '#apply')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+        $file = $request->file('cv');
+        $directory = public_path('cv');
+        if (!is_dir($directory)) {
+            mkdir($directory, 0775, true);
+        }
+
+        $originalName = $file->getClientOriginalName();
+        $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $storedName = now()->format('YmdHis') . '-' . Str::slug($baseName) . '-' . Str::random(6) . '.' . $extension;
+        $file->move($directory, $storedName);
+
+        AllCv::create([
+            'country_job_id' => $job->id,
+            'full_name' => $data['full_name'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+            'current_location' => $data['current_location'],
+            'message' => $data['message'] ?? null,
+            'cv_file_name' => $originalName,
+            'cv_file_path' => 'cv/' . $storedName,
+            'cv_file_size' => filesize(public_path('cv/' . $storedName)) ?: null,
+            'cv_mime_type' => $file->getClientMimeType(),
+            'consent_accepted_at' => now(),
+        ]);
+
+        return redirect(url()->previous() . '#apply')->with('success', 'Your CV has been submitted successfully.');
     }
 
     public function contactStore(ContactRequest $request)

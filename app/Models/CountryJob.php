@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CountryJob extends BaseModel
 {
@@ -45,5 +46,10 @@ class CountryJob extends BaseModel
     public function benefits(): BelongsToMany
     {
         return $this->belongsToMany(JobBenefit::class, 'country_job_benefit')->withTimestamps();
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(AllCv::class, 'country_job_id');
     }
 }

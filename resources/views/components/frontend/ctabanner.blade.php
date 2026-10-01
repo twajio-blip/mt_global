@@ -14,7 +14,7 @@
 @endphp
 
 <section class="py-16 lg:py-24 bg-white" aria-labelledby="cta-title">
-    <div class="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
+    <div class="container">
         <div class="grid overflow-hidden rounded-2xl bg-[#1F4580] lg:grid-cols-2">
             <div class="p-8 sm:p-12 lg:p-14">
                 <h2 id="cta-title" class="text-3xl font-bold tracking-tight text-white md:text-4xl">
