@@ -1,130 +1,276 @@
 <x-Deshboard-layout>
-    @php
-        $statusClass = function ($job) {
-            $status = $job->status ?? ($job->is_active ? 'active' : 'inactive');
-            return match ($status) {
-                'active' => 'bg-[#DCFCE7] text-[#166534]',
-                'draft' => 'bg-[#FEF3C7] text-[#92400E]',
-                default => 'bg-[#FEE2E2] text-[#991B1B]',
-            };
-        };
-        $statusLabel = fn ($job) => match ($job->status ?? ($job->is_active ? 'active' : 'inactive')) {
-            'active' => 'Published',
-            'draft' => 'Draft',
-            default => 'Inactive',
-        };
-        $initials = function ($name) {
-            return collect(explode(' ', trim((string) $name)))
-                ->filter()
-                ->take(2)
-                ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
-                ->implode('') ?: '-';
-        };
-    @endphp
-
-    <div class="space-y-8 py-8">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-skin-backend-text-base">Welcome back</h1>
-                <p class="mt-1 text-sm text-skin-backend-text-base text-opacity-55">Here's how your published jobs are performing.</p>
-            </div>
-            <a href="{{ route('jobs.jobs.index') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-skin-backend-accent px-4 text-sm font-semibold text-skin-invert transition-opacity hover:opacity-90">
-                <i class="fa-solid fa-plus text-xs"></i>
-                Add New Job
-            </a>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-16">
+        <!-- Card -->
+        <div class="shadow-sm rounded-[10px] bg-skin-backend-secondary p-4 space-y-2">
+            <span
+                class="text-2xl rounded-[10px] w-[44px] h-[44px] bg-skin-backend-primary flex items-center justify-center text-skin-hover">
+                <i class="fa-solid fa-file-pen"></i>
+            </span>
+            <p class="text-[18px] text-skin-backend-text-base">
+                Blog Posts
+            </p>
+            <h3 class="text-xl sm:text-[40px] font-[800] text-skin-backend-text-base py-3">
+                {{ formatNumberShort($data['blog_post']) ?? 0 }}
+            </h3>
         </div>
+        <div class="shadow-sm rounded-[10px] bg-skin-backend-secondary p-4 space-y-2">
+            <span
+                class="text-2xl rounded-[10px] w-[44px] h-[44px] bg-skin-backend-primary flex items-center justify-center text-skin-hover">
+                <i class="fa-solid fa-users"></i>
+            </span>
+            <p class="text-[18px] text-skin-backend-text-base">
+                Website Visitors
+            </p>
+            <h3 class="text-xl sm:text-[40px] font-[800] text-skin-backend-text-base py-3">
+                {{ formatNumberShort($data['visitors']) ?? 0 }}
+            </h3>
+        </div>
+        <div class="shadow-sm rounded-[10px] bg-skin-backend-secondary p-4 space-y-2">
+            <span
+                class="text-2xl rounded-[10px] w-[44px] h-[44px] bg-skin-backend-primary flex items-center justify-center text-skin-hover">
+                <i class="fa-solid fa-user-plus"></i>
+            </span>
+            <p class="text-[18px] text-skin-backend-text-base">
+                Subscribers
+            </p>
+            <h3 class="text-xl sm:text-[40px] font-[800] text-skin-backend-text-base py-3">
+                {{ formatNumberShort($data['subscribers']) ?? 0 }}
+            </h3>
+        </div>
+        <div class="shadow-sm rounded-[10px] bg-skin-backend-secondary p-4 space-y-2">
+            <span
+                class="text-2xl rounded-[10px] w-[44px] h-[44px] bg-skin-backend-primary flex items-center justify-center text-skin-hover">
+                <i class="fa-solid fa-headset"></i>
+            </span>
+            <p class="text-[18px] text-skin-backend-text-base">
+                Contact
+            </p>
+            <h3 class="text-xl sm:text-[40px] font-[800] text-skin-backend-text-base py-3">
+                {{ formatNumberShort($data['contacts']) ?? 0 }}
+            </h3>
+        </div>
+        <!-- End Card -->
+    </div>
 
-        <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            @foreach ($data['job_stats'] as $stat)
-                <li>
-                    <a href="{{ $stat['route'] }}" class="block h-full rounded-xl border border-default border-opacity-10 bg-skin-backend-secondary p-5 transition-[border-color,box-shadow] duration-150 hover:border-skin-backend-accent-text hover:shadow-lg">
-                        <p class="text-sm font-medium text-skin-backend-text-base text-opacity-65">{{ $stat['label'] }}</p>
-                        <p class="mt-2 text-3xl font-bold tabular-nums text-skin-backend-text-base">{{ formatNumberShort($stat['value']) }}</p>
-                        <p class="mt-1 text-[13px] text-skin-backend-text-base text-opacity-45">{{ $stat['note'] }}</p>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
+    <div class="mt-8 bg-skin-backend-secondary p-6 rounded-xl text-skin-backend-text-base">
+        <!-- Card -->
+        <div class="relative">
+            <h2 class="text-[20px] font-bold absolute">Total Site Visitor</h2>
+            <div class="text-center">
+                <h2 class="text-[16px]">Total Site Visitor</h2>
+                <div class="text-[30px] font-bold text-skin-hover mt-2">{{ $data['visitors_total'] }}</div>
+                <div class="text-[16px] mb-4"><span class="text-green-400 font-bold">+{{ $data['growth_percent'] }}
+                        %</span> than last month</div>
+            </div>
+        </div>
+        <div id="visitorsChart" data="{{ $data['month_wise_visitors'] }}"></div>
+        <!-- End Card -->
+    </div>
+    <div class="lg:grid grid-cols-12 gap-8 mt-8 space-y-4 lg:space-y-0">
+        <div class="col-span-12 lg:col-span-8 bg-skin-backend-secondary p-6 rounded-xl text-skin-backend-text-base">
+            <h2 class="text-[20px] font-bold">Site Visitor By Device: Mobile vs PC</h2>
+            <!-- Card -->
+            <div class="h-full flex flex-col items-center justify-center">
+                <div id="visitorsByDeviceChart" class="w-full" data="{{ $data['device_wise_visitors'] }}"></div>
+            </div>
 
-        <div class="grid gap-6 xl:grid-cols-5">
-            <section aria-labelledby="recent-cvs" class="rounded-2xl border border-default border-opacity-10 bg-skin-backend-secondary xl:col-span-3">
-                <div class="flex items-center justify-between border-b border-default border-opacity-10 px-5 py-4">
-                    <h2 id="recent-cvs" class="text-base font-semibold text-skin-backend-text-base">Recent CV Submissions</h2>
-                    <a href="{{ route('cvs.index') }}" class="flex items-center gap-1 text-sm font-semibold text-skin-backend-accent-text hover:opacity-80">
-                        View all <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </a>
-                </div>
-                <ul class="divide-y divide-default divide-opacity-10">
-                    @forelse ($data['recent_cvs'] as $application)
-                        @php
-                            $job = $application->job;
-                            $country = $job?->country;
-                        @endphp
-                        <li class="flex items-center gap-3 px-5 py-3.5">
-                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-skin-backend-primary text-[13px] font-semibold text-skin-backend-accent-text">
-                                {{ $initials($application->full_name) }}
+            <!-- End Card -->
+        </div>
+        <div class="col-span-12 lg:col-span-4 bg-skin-backend-secondary p-6 rounded-xl text-skin-backend-text-base">
+            <div class="space-y-2">
+                <h2 class="text-[20px] font-bold">New Subscribers</h2>
+                <h3 class="text-[14px] text-skin-backend-text-base text-opacity-25">You have
+                    {{ formatNumberShort($data['subscribers']) ?? 0 }} new
+                    {{ formatNumberShort($data['subscribers']) > 1 ? 'subscribers' : 'subscriber' }}</h3>
+            </div>
+            <!-- Card -->
+            <ul
+                class="my-4 space-y-4 h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800">
+                @foreach ($data['subscribers_details'] as $subscribers_detail)
+                    <li class="flex items-center gap-4">
+                        <span
+                            class="shrink-0 w-[50px] h-[50px] flex items-center justify-center rounded-[10px] bg-skin-backend-primary text-skin-hover text-xl"><i
+                                class="fa-solid fa-user-plus"></i></span>
+                        <div class="text-[14px]">
+                            <h3 class="text-skin-backend-text-base">
+                                {{ \Carbon\Carbon::parse($subscribers_detail->created_at)->format('d M y h:i A') }}
+
+
+                            </h3>
+
+                            <h2 class="text-skin-backend-text-base text-opacity-25 break-all">
+                                {{ $subscribers_detail->email }}</h2>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+            <div>
+                <a href="{{ route('subscriber.index') }}"
+                    class="block text-center px-6 py-3 bg-skin-backend-accent text-skin-invert rounded-[10px] text-[14px] font-[600] hover:opacity-90 transition-opacity duration-300">View
+                    More</a>
+            </div>
+            <!-- End Card -->
+        </div>
+        <div class="col-span-12 lg:col-span-8 bg-skin-backend-secondary p-6 rounded-xl text-skin-backend-text-base">
+            <div class="space-y-4">
+                <h2 class="text-[20px] font-bold">Recent Activity</h2>
+                <h3 class="text-[14px] text-skin-backend-text-base text-opacity-25">Maiores dicta atque dolorem
+                    temporibus </h3>
+            </div>
+
+            <!-- Card -->
+            <!--
+            Activity Timeline
+            This section displays a vertical scrollable timeline of system activities, such as created or updated events.
+            -->
+            <ul
+                class="[&>:last-child_span]:after:hidden pt-8 h-[330px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800">
+
+                @foreach ($data['activities'] as $activity)
+                    <li class="relative pl-8 pb-6">
+
+                        <!--
+                        Timeline Dot and Vertical Connector Line
+                        - Dot represents the activity point
+                        - Line visually connects the items vertically
+                    -->
+                        <div class="h-full absolute top-0 left-0">
+                            <span
+                                class="w-4 inline-block relative h-full 
+                            before:absolute before:top-0 before:left-1/2 
+                            before:bg-skin-backend-secondary before:z-30 
+                            before:w-4 before:h-4 before:rounded-full 
+                            before:border-4 before:border-highlight 
+                            before:-translate-x-1/2 before:translate-y-[10px]
+                            after:absolute after:w-[1px] after:h-full 
+                            after:left-1/2 after:top-0 
+                            after:-translate-x-1/2 after:translate-y-[10px] 
+                            after:bg-[#e3e3e3] after:bg-opacity-80 after:z-20">
                             </span>
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate text-[15px] font-medium text-skin-backend-text-base">{{ $application->full_name }}</p>
-                                <p class="flex items-center gap-1.5 truncate text-[13px] text-skin-backend-text-base text-opacity-50">
-                                    @if ($country?->flag_code)
-                                        <img src="https://flagcdn.com/w40/{{ $country->flag_code }}.png" alt="" class="h-4 w-6 rounded-[2px] object-cover ring-1 ring-black/10">
-                                    @endif
-                                    <span class="truncate">{{ $job?->title ?? 'Deleted job' }}</span>
-                                </p>
-                            </div>
-                            <span class="shrink-0 text-[13px] text-skin-backend-text-base text-opacity-45">{{ $application->created_at?->diffForHumans() }}</span>
-                        </li>
-                    @empty
-                        <li class="px-5 py-10 text-center text-sm text-skin-backend-text-base text-opacity-50">No CV submissions yet.</li>
-                    @endforelse
-                </ul>
-            </section>
+                        </div>
 
-            <section aria-labelledby="recent-jobs" class="rounded-2xl border border-default border-opacity-10 bg-skin-backend-secondary xl:col-span-2">
-                <div class="flex items-center justify-between border-b border-default border-opacity-10 px-5 py-4">
-                    <h2 id="recent-jobs" class="text-base font-semibold text-skin-backend-text-base">Recent Job Posts</h2>
-                    <a href="{{ route('jobs.jobs.index') }}" class="flex items-center gap-1 text-sm font-semibold text-skin-backend-accent-text hover:opacity-80">
-                        All jobs <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </a>
-                </div>
-                <ul class="divide-y divide-default divide-opacity-10">
-                    @forelse ($data['recent_jobs'] as $job)
-                        @php
-                            $cvCount = (int) $job->applications_count;
-                            $barWidth = min(100, round(($cvCount / $data['max_job_cvs']) * 100));
-                        @endphp
-                        <li class="px-5 py-3.5">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <a href="{{ route('jobs.jobs.index', ['search' => $job->title]) }}" class="block truncate text-[15px] font-medium text-skin-backend-text-base hover:text-skin-backend-accent-text">
-                                        {{ $job->title }}
-                                    </a>
-                                    <p class="mt-0.5 flex items-center gap-1.5 text-[13px] text-skin-backend-text-base text-opacity-50">
-                                        @if ($job->country?->flag_code)
-                                            <img src="https://flagcdn.com/w40/{{ $job->country->flag_code }}.png" alt="" class="h-4 w-6 rounded-[2px] object-cover ring-1 ring-black/10">
-                                        @endif
-                                        {{ $job->country?->name ?? 'No country' }}
-                                    </p>
-                                </div>
-                                <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $statusClass($job) }}">
-                                    {{ $statusLabel($job) }}
-                                </span>
-                            </div>
-                            <div class="mt-2.5 flex items-center gap-3">
-                                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-skin-backend-primary" aria-hidden>
-                                    <div class="h-full rounded-full bg-skin-backend-accent" style="width: {{ $barWidth }}%"></div>
-                                </div>
-                                <a href="{{ route('cvs.index', ['search' => $job->title]) }}" class="w-14 shrink-0 text-right text-[13px] font-semibold tabular-nums text-skin-backend-text-base hover:text-skin-backend-accent-text">
-                                    {{ $cvCount }} {{ \Illuminate\Support\Str::plural('CV', $cvCount) }}
-                                </a>
-                            </div>
-                        </li>
-                    @empty
-                        <li class="px-5 py-10 text-center text-sm text-skin-backend-text-base text-opacity-50">No jobs found.</li>
-                    @endforelse
-                </ul>
-            </section>
+                        <!-- Activity Content Block -->
+                        <div class="space-y-2">
+                            <!-- Display formatted activity timestamp -->
+                            <h2 class="text-skin-backend-text-base text-[14px] font-[500]">
+                                {{ \Carbon\Carbon::parse($activity->created_at)->format('F jS, h:i A') }}
+                            </h2>
+
+                            <p class="text-[14px] text-skin-backend-text-base text-opacity-70 leading-relaxed">
+                                @php
+                                    // Fields we don't want to show in the changes list
+$ignoredFields = ['updated_at', 'created_at', 'deleted_at'];
+
+// Placeholder for formatted change messages
+$changes = [];
+
+// Get new and old values from activity properties
+$newData = $activity->properties['attributes'] ?? [];
+$oldData = $activity->properties['old'] ?? [];
+
+// Format the log name (e.g., "user_login" → "User Login")
+$logName = ucwords(str_replace('_', ' ', $activity->log_name ?? 'Item'));
+
+// Format action name (e.g., "created", "updated")
+$action = ucfirst($activity->description);
+
+// Helper function to limit length of string content
+$truncate = function ($text, $limit = 150) {
+    if (is_array($text) || is_object($text)) {
+        $text = json_encode($text);
+    }
+    $text = (string) $text;
+    return strlen($text) > $limit ? substr($text, 0, $limit) . '...' : $text;
+};
+
+// Handle 'updated' activity: Compare old vs. new data
+if ($activity->description === 'updated') {
+    foreach ($newData as $field => $newValue) {
+        if (in_array($field, $ignoredFields)) {
+            continue;
+        }
+
+        $oldValue = $oldData[$field] ?? null;
+
+        // If the field value changed, add to the list
+        if ($oldValue !== null && $oldValue != $newValue) {
+            $fieldLabel = ucwords(str_replace('_', ' ', $field));
+
+            $changes[] =
+                "<strong>{$fieldLabel}</strong> changed from “<span class='text-skin-hover'>" .
+                e($truncate($oldValue)) .
+                "</span>” to “<span class='text-green-600'>" .
+                e($truncate($newValue)) .
+                '</span>”.';
+        }
+    }
+}
+
+// Handle 'created' activity (optional): You may want to list created fields if needed
+elseif ($activity->description === 'created') {
+    foreach ($newData as $field => $value) {
+        if (in_array($field, $ignoredFields)) {
+            continue;
+        }
+
+        // Currently does nothing — you can show "Field: Value" if needed
+        $fieldLabel = ucwords(str_replace('_', ' ', $field));
+                                        }
+                                    }
+                                @endphp
+
+                                <!-- Display the summary of the action -->
+                                <strong>{{ $action }} {{ $logName }}</strong>
+
+                                <!-- Display a detailed list of changes if available -->
+                                @if (count($changes))
+                                    <ul class="mt-1 list-disc list-inside space-y-1 text-sm">
+                                        @foreach ($changes as $change)
+                                            <li>{!! $change !!}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </p>
+                        </div>
+                    </li>
+                @endforeach
+
+            </ul>
+            <!-- End Card -->
+        </div>
+        <div class="col-span-12 lg:col-span-4 bg-skin-backend-secondary p-6 rounded-xl text-skin-backend-text-base">
+            <div class="space-y-2">
+                <h2 class="text-[20px] font-bold">Contacts</h2>
+                <h3 class="text-[14px] text-skin-backend-text-base text-opacity-25">You have
+                    {{ formatNumberShort($data['contacts']) ?? 0 }} new
+                    {{ formatNumberShort($data['contacts']) > 1 ? 'contacts' : 'contact' }}</h3>
+            </div>
+            <!-- Card -->
+            <ul
+                class="my-4 space-y-4 h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800">
+                @foreach ($data['contacts_details'] as $contacts_detail)
+                    <li class="flex items-center gap-4">
+                        <span
+                            class="shrink-0 w-[50px] h-[50px] flex items-center justify-center rounded-[10px] bg-skin-backend-primary text-skin-hover text-xl"><i
+                                class="fa-solid fa-comment"></i></span>
+                        <div class="text-[14px]">
+                            <h3 class="text-skin-backend-text-base">{{ $contacts_detail->name }}</h3>
+                            <h2 class="text-skin-backend-text-base text-opacity-25 line-clamp-2">
+                                {{ $contacts_detail->subject }}</h2>
+                        </div>
+                    </li>
+                @endforeach
+
+            </ul>
+            <div>
+                <a href="#"
+                    class="block text-center px-6 py-3 bg-skin-backend-accent text-skin-invert rounded-[10px] text-[14px] font-[600] hover:opacity-90 transition-opacity duration-300">View
+                    More</a>
+            </div>
+            <!-- End Card -->
         </div>
     </div>
+
+
+
 </x-Deshboard-layout>

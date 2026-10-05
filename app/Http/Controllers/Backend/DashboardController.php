@@ -8,9 +8,7 @@ use App\Models\VisitorLogs;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
-use App\Models\AllCv;
 use App\Models\Contact;
-use App\Models\CountryJob;
 use App\Models\Subscriber;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
@@ -19,48 +17,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $jobs = CountryJob::with(['country', 'jobDesignation'])
-            ->withCount('applications')
-            ->latest()
-            ->get();
-        $applications = AllCv::with(['job.country', 'job.jobDesignation'])
-            ->latest()
-            ->get();
-        $activeJobs = $jobs->filter(fn ($job) => ($job->status ?? null) === 'active' || (bool) $job->is_active);
-        $drafts = $jobs->where('status', 'draft')->count();
-        $inactive = $jobs->filter(fn ($job) => ($job->status ?? null) === 'inactive' || !(bool) $job->is_active)->count();
-        $recentCvs = $applications->where('created_at', '>=', now()->subDays(7))->count();
-        $jobsWithCvs = $applications->pluck('country_job_id')->unique()->count();
-
-        $data['job_stats'] = [
-            [
-                'label' => 'Active Jobs',
-                'value' => $activeJobs->count(),
-                'note' => number_format((int) $activeJobs->sum('vacancies')) . ' open vacancies',
-                'route' => route('jobs.jobs.index', ['status' => 'active']),
-            ],
-            [
-                'label' => 'Total Jobs',
-                'value' => $jobs->count(),
-                'note' => "{$drafts} draft · {$inactive} inactive",
-                'route' => route('jobs.jobs.index'),
-            ],
-            [
-                'label' => 'CVs Received',
-                'value' => $applications->count(),
-                'note' => 'Across ' . $jobsWithCvs . ' jobs',
-                'route' => route('cvs.index'),
-            ],
-            [
-                'label' => 'Recent CVs',
-                'value' => $recentCvs,
-                'note' => 'Last 7 days',
-                'route' => route('cvs.index'),
-            ],
-        ];
-        $data['recent_cvs'] = $applications->take(7);
-        $data['recent_jobs'] = $jobs->take(6);
-        $data['max_job_cvs'] = max(1, (int) $data['recent_jobs']->max('applications_count'));
 
         // Count of blog posts created in the current month
         $data['blog_post'] = BlogPost::whereMonth('created_at', Carbon::now()->month)->count();

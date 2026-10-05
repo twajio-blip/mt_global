@@ -1,64 +1,47 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { ScrollToTop } from './components/ScrollToTop';
-import { PublicLayout } from './components/public/PublicLayout';
-import { PortalLayout } from './components/portal/PortalLayout';
-import { RequireAuth } from './components/portal/RequireAuth';
-import { AuthProvider } from './contexts/AuthContext';
-import { DataProvider } from './contexts/DataContext';
-import { Home } from './pages/public/Home';
-import { About } from './pages/public/About';
-import { Jobs } from './pages/public/Jobs';
-import { JobDetails } from './pages/public/JobDetails';
-import { LegalPage } from './pages/public/LegalPage';
-import { Contact } from './pages/public/Contact';
-import { PortalLogin } from './pages/portal/PortalLogin';
-import { Dashboard } from './pages/portal/Dashboard';
-import { JobsManage } from './pages/portal/JobsManage';
-import { JobEditor } from './pages/portal/JobEditor';
-import { CvManage } from './pages/portal/CvManage';
+import { Layout } from './components/layout/Layout';
+import { Home } from './pages/Home';
+import { About } from './pages/About';
+import { ExecutiveCommittee } from './pages/committee/ExecutiveCommittee';
+import { AdvisoryCommittee } from './pages/committee/AdvisoryCommittee';
+import { FormerPresidents } from './pages/committee/FormerPresidents';
+import { FormerGeneralSecretaries } from './pages/committee/FormerGeneralSecretaries';
+import { GeneralMembers } from './pages/committee/GeneralMembers';
+import { Notices } from './pages/Notices';
+import { Gallery } from './pages/Gallery';
+import { AlbumDetail } from './pages/AlbumDetail';
+import { Contact } from './pages/Contact';
+import { WebLinks } from './pages/WebLinks';
+import { Condolence } from './pages/Condolence';
+import { DocumentPage } from './pages/nbr/DocumentPage';
+import { BerthingSchedule } from './pages/port/BerthingSchedule';
+import { PortTariff } from './pages/port/PortTariff';
 
 export function App() {
   return (
-    <DataProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route element={<PublicLayout />}>
-              <Route index element={<Home />} />
-              <Route path="about" element={<About />} />
-              <Route path="jobs" element={<Jobs />} />
-              <Route path="jobs/:jobId" element={<JobDetails />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="privacy-policy" element={<LegalPage pageKey="privacy" />} />
-              <Route path="terms-and-conditions" element={<LegalPage pageKey="terms" />} />
-              <Route path="recruitment-disclaimer" element={<LegalPage pageKey="recruitment-disclaimer" />} />
-              <Route path="cv-submission-policy" element={<LegalPage pageKey="cv-submission" />} />
-              <Route path="cookie-policy" element={<LegalPage pageKey="cookies" />} />
-              <Route path="licence-regulatory-information" element={<LegalPage pageKey="licence" />} />
-            </Route>
-            <Route path="portal/login" element={<PortalLogin />} />
-            <Route
-              path="portal"
-              element={
-              <RequireAuth>
-                  <PortalLayout />
-                </RequireAuth>
-              }>
-              
-              <Route index element={<Dashboard />} />
-              <Route path="jobs" element={<JobsManage />} />
-              <Route path="jobs/new" element={<JobEditor />} />
-              <Route path="jobs/:jobId/edit" element={<JobEditor />} />
-              <Route path="cvs" element={<CvManage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster position="top-center" richColors closeButton />
-      </AuthProvider>
-    </DataProvider>);
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/committee/executive" element={<ExecutiveCommittee />} />
+          <Route path="/committee/advisory" element={<AdvisoryCommittee />} />
+          <Route path="/committee/former-presidents" element={<FormerPresidents />} />
+          <Route path="/committee/former-general-secretaries" element={<FormerGeneralSecretaries />} />
+          <Route path="/committee/general-members" element={<GeneralMembers />} />
+          <Route path="/notices" element={<Notices />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/gallery/:albumId" element={<AlbumDetail />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/weblink" element={<WebLinks />} />
+          <Route path="/condolence" element={<Condolence />} />
+          <Route path="/nbr/:slug" element={<DocumentPage />} />
+          <Route path="/port/berthing-schedule" element={<BerthingSchedule />} />
+          <Route path="/port/tariff" element={<PortTariff />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>);
 
 }

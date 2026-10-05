@@ -1,4 +1,4 @@
-﻿@props(['pageinfo' => false])
+@props(['pageinfo' => false])
 <!doctype html>
 <html lang="en">
 
@@ -64,24 +64,23 @@
     @endif
 
 
-    <div class=" min-h-screen flex flex-col font-sans">
+    <div class="min-h-screen flex flex-col font-sans">
         <!-- Main -->
-        <main class="flex-grow ">
+        <main class="flex-grow">
 
             {{ $slot }}
 
         </main>
 
+        @php
+            $footerComponent = $pageinfo?->footer_component ?? $general?->footer_component;
+        @endphp
+
+        @if ($footerComponent)
+            @component('components.frontend.footer.' . $footerComponent)
+            @endcomponent
+        @endif
     </div>
-    @php
-        $footerComponent = $pageinfo?->footer_component ?? $general?->footer_component;
-
-    @endphp
-
-    @if ($footerComponent)
-        @component('components.frontend.footer.' . $footerComponent)
-        @endcomponent
-    @endif
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ $general?->google_analytics }}"></script>

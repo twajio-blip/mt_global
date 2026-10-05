@@ -106,7 +106,7 @@
     </script>
     @endif
 
-    <div class="min-h-screen bg-brand-light font-body selection:bg-brand-red selection:text-white">
+    <div class="flex flex-col min-h-screen bg-[#F5F7F8] font-body selection:bg-[#105493] selection:text-white">
         {{-- <x-frontend.top-header /> --}}
         @php
             $headerComponent = $pageinfo->header_component ?? $general->header_component;
@@ -119,7 +119,7 @@
         @endif
 
         <!-- Main -->
-        <main class="bg-brand-light mt-27.25">
+        <main class="flex-grow bg-[#F5F7F8]">
 
             {{ $slot }}
 

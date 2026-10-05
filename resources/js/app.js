@@ -448,7 +448,7 @@ $(document).ready(function () {
             $(this)
                 .closest("aside")
                 .addClass("md:w-[70px]")
-                .removeClass("md:w-[240px] ");
+                .removeClass("md:w-[240px]");
             $(this).closest("aside").find(".hideable").addClass("hidden");
             $(this).closest("aside").find(".dropdown").addClass("!hidden");
             $(this)

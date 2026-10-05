@@ -1,5 +1,5 @@
 <ul
-    class="sidebar-nav pb-4 md:py-4 mt-4 text-white text-[14px] bg-bankround-2 h-[calc(100%-60px)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800 space-y-2">
+    class="sidebar-nav pb-4 md:py-4 mt-4 text-white text-[14px] bg-skin-backend-secondary h-[calc(100%-60px)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800 space-y-2">
     <!-- Search -->
     <li class="px-2 space-y-1 pb-4">
       <!-- Search box -->
@@ -8,7 +8,7 @@
             <i class="fa-solid fa-magnifying-glass"></i>
         </span>
         <input type="search" id="menuSearch" placeholder="Search For..."
-            class="w-full bg-background-2 border border-default border-opacity-25 rounded-[10px] focus:outline-none focus:ring-0 focus:border-highlight pl-10 py-3 text-sm"
+            class="w-full bg-skin-backend-secondary border border-default border-opacity-25 rounded-[10px] focus:outline-none focus:ring-0 focus:border-highlight pl-10 py-3 text-sm"
             autocomplete="off">
     
         <!-- Suggestions dropdown -->
@@ -62,43 +62,6 @@
             </li>
         @endif
     @endisset
-    {{-- Jobs --}}
-    <li class="px-2 space-y-1">
-        <div
-            class="dropdown-trigger {{ Route::is('jobs.*') ? 'sidebar-nav-active' : '' }}  active-trigger flex items-center gap-2 py-2.5 px-4 cursor-pointer rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">
-            <span class="w-4 h-4 flex items-center"><i class="fa-solid fa-briefcase"></i></span>
-            <h1 class="hideable">Jobs</h1>
-            <i class="dropdown-icon hideable fa-solid fa-angle-down ml-auto rotate-0 transition-transform inline-block"></i>
-        </div>
-        <ul class="dropdown space-y-1" style="display: {{ Route::is('jobs.*') ? 'block' : 'none' }};">
-            <li><a href="{{ route('jobs.countries.index') }}"
-                    class="active-trigger {{ Route::is('jobs.countries.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Countries</a>
-            </li>
-            <li><a href="{{ route('jobs.categories.index') }}"
-                    class="active-trigger {{ Route::is('jobs.categories.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Categories</a>
-            </li>
-            <li><a href="{{ route('jobs.designations.index') }}"
-                    class="active-trigger {{ Route::is('jobs.designations.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Designations</a>
-            </li>
-            <li><a href="{{ route('jobs.benefits.index') }}"
-                    class="active-trigger {{ Route::is('jobs.benefits.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Benefits</a>
-            </li>
-            <li><a href="{{ route('jobs.employment-types.index') }}"
-                    class="active-trigger {{ Route::is('jobs.employment-types.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Employment Types</a>
-            </li>
-            <li><a href="{{ route('jobs.jobs.index') }}"
-                    class="active-trigger {{ Route::is('jobs.jobs.*') ? 'sidebar-nav-active active-nav' : '' }} relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Manage
-                    Jobs</a>
-            </li>
-        </ul>
-    </li>
-    <li class="px-2 space-y-1">
-        <a href="{{ route('cvs.index') }}"
-            class="active-trigger {{ Route::is('cvs.*') ? 'sidebar-nav-active active-nav' : '' }} flex items-center gap-2 rounded-md px-4 py-2.5 transition-colors hover:bg-skin-backend-accent hover:text-skin-invert">
-            <span class="flex h-4 w-4 items-center"><i class="fa-solid fa-file-lines"></i></span>
-            <h1 class="hideable">CVs</h1>
-        </a>
-    </li>
     {{-- <h2 old_data="Content & Media"
         class="px-6 py-2 text-skin-backend-text-base text-opacity-40 nav-section-title text-[12px]">Content & Media</h2>
     <!-- Element -->

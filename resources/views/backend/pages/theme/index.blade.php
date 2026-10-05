@@ -74,6 +74,11 @@
                                     placeholder="Location" required> --}}
                             </div>
                             <div class="col-span-12 md:col-span-6">
+                                <x-backend.input-label :value="'Office Hours'" for="office_hours" />
+                                <x-backend.input-field type="text" name="office_hours" id='office_hours' :value="$general?->office_hours"
+                                    placeholder="Sunday – Thursday, 9:00 AM – 5:00 PM" />
+                            </div>
+                            <div class="col-span-12 md:col-span-6">
                                 <x-backend.input-label :value="'Description'" for="description" />
                                 <x-backend.input-textarea type="text" name="description" id='description' :text="$general?->description"
                                     placeholder="Location" required />
