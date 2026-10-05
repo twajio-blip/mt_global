@@ -102,4 +102,33 @@ class SettingsController extends Controller
         }
         return redirect()->back()->with(['success' => 'Header and Footer settings updated successfully!']);
     }
+
+    public function sidebarSettings(Request $request)
+    {
+        $general = General::first();
+        $components = \App\Models\ComponentMaster::orderBy('name')->get();
+
+        $leftSidebar = $general->left_sidebar_components ?? ['PrayerTimes', 'LeaderMessage', 'LatestNotices'];
+        $rightSidebar = $general->right_sidebar_components ?? ['NBRLinks', 'PortLinks', 'CurrencyConverter', 'CondolenceWidget', 'LinkListModule'];
+
+        return view('backend.settings.sidebar', compact('general', 'components', 'leftSidebar', 'rightSidebar'));
+    }
+
+    public function storeSidebarSettings(Request $request)
+    {
+        $left = array_values(array_filter($request->input('left_sidebar_components', [])));
+        $right = array_values(array_filter($request->input('right_sidebar_components', [])));
+
+        General::updateOrCreate(
+            ['id' => 1],
+            [
+                'left_sidebar_components' => $left,
+                'right_sidebar_components' => $right,
+            ]
+        );
+
+        \Illuminate\Support\Facades\Cache::forget('general_settings');
+
+        return redirect()->back()->with('success', 'Global Sidebar Settings updated successfully!');
+    }
 }

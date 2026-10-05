@@ -9,4 +9,9 @@ class General extends  BaseModel
 {
     use HasFactory;
     protected $guarded = [];
+
+    protected $casts = [
+        'left_sidebar_components' => 'array',
+        'right_sidebar_components' => 'array',
+    ];
 }

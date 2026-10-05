@@ -3,36 +3,35 @@
         <x-frontend.breadcrumbs :data="$page" />
     @endif
 
+    @php
+        $leftKeys = is_array($general->left_sidebar_components ?? null) 
+            ? $general->left_sidebar_components 
+            : ['PrayerTimes', 'LeaderMessage', 'LatestNotices'];
+        $rightKeys = is_array($general->right_sidebar_components ?? null) 
+            ? $general->right_sidebar_components 
+            : ['NBRLinks', 'PortLinks', 'CurrencyConverter', 'CondolenceWidget', 'LinkListModule'];
+        $allSidebarKeys = array_merge($leftKeys, $rightKeys);
+    @endphp
+
     <div class="mx-auto w-full max-w-[1320px] flex-1 px-4 py-5 lg:px-6">
         <div class="lg:flex lg:items-start lg:gap-5">
             {{-- Left Sidebar: Sticky 260px --}}
-            <aside aria-label="Association information" class="hidden shrink-0 space-y-5 lg:block lg:w-[260px] lg:sticky lg:top-[220px] self-start">
-                @php
-                    $leftKeys = ['PrayerTimes', 'LeaderMessage', 'LatestNotices'];
-                    $hasLeft = false;
-                @endphp
+            <aside aria-label="Association information" class="hidden shrink-0 space-y-5 lg:block lg:w-[260px] lg:sticky lg:top-[68px] self-start">
                 @foreach ($leftKeys as $lk)
                     @if (isset($components[$lk]))
-                        @php $hasLeft = true; @endphp
                         @component('components.frontend.' . $lk, ['data' => $components[$lk]])
+                        @endcomponent
+                    @elseif (view()->exists('components.frontend.' . $lk))
+                        @component('components.frontend.' . $lk)
                         @endcomponent
                     @endif
                 @endforeach
-
-                @if (!$hasLeft)
-                    @component('components.frontend.PrayerTimes')
-                    @endcomponent
-                @endif
             </aside>
 
-            {{-- Middle Main Column: Flexible width (flex-1), takes remaining space --}}
+            {{-- Middle Main Column: Flexible width (flex-1), page-specific content --}}
             <main class="min-w-0 lg:flex-1 space-y-5">
-                @php
-                    $sidebarKeys = ['PrayerTimes', 'LeaderMessage', 'LatestNotices', 'NBRLinks', 'PortLinks', 'CurrencyConverter', 'CondolenceWidget', 'LinkListModule'];
-                @endphp
-
                 @foreach ($components as $key => $component)
-                    @if (!in_array($key, $sidebarKeys))
+                    @if (!in_array($key, $allSidebarKeys))
                         @if (view()->exists('components.frontend.' . $key))
                             @component('components.frontend.' . $key, ['data' => $component])
                             @endcomponent
@@ -48,13 +47,13 @@
             </main>
 
             {{-- Right Sidebar: Sticky 260px --}}
-            <aside aria-label="Regulatory and service information" class="hidden shrink-0 space-y-5 lg:block lg:w-[260px] lg:sticky lg:top-[220px] self-start">
-                @php
-                    $rightKeys = ['NBRLinks', 'PortLinks', 'CurrencyConverter', 'CondolenceWidget', 'LinkListModule'];
-                @endphp
+            <aside aria-label="Regulatory and service information" class="hidden shrink-0 space-y-5 lg:block lg:w-[260px] lg:sticky lg:top-[68px] self-start">
                 @foreach ($rightKeys as $rk)
                     @if (isset($components[$rk]))
                         @component('components.frontend.' . $rk, ['data' => $components[$rk]])
+                        @endcomponent
+                    @elseif (view()->exists('components.frontend.' . $rk))
+                        @component('components.frontend.' . $rk)
                         @endcomponent
                     @endif
                 @endforeach
@@ -68,17 +67,19 @@
                     @if (isset($components[$lk]))
                         @component('components.frontend.' . $lk, ['data' => $components[$lk]])
                         @endcomponent
+                    @elseif (view()->exists('components.frontend.' . $lk))
+                        @component('components.frontend.' . $lk)
+                        @endcomponent
                     @endif
                 @endforeach
-                @if (!$hasLeft)
-                    @component('components.frontend.PrayerTimes')
-                    @endcomponent
-                @endif
             </div>
             <div class="space-y-5">
                 @foreach ($rightKeys as $rk)
                     @if (isset($components[$rk]))
                         @component('components.frontend.' . $rk, ['data' => $components[$rk]])
+                        @endcomponent
+                    @elseif (view()->exists('components.frontend.' . $rk))
+                        @component('components.frontend.' . $rk)
                         @endcomponent
                     @endif
                 @endforeach
@@ -86,4 +87,3 @@
         </div>
     </div>
 </x-Guest-layout>
-

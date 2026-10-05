@@ -16,7 +16,7 @@
 @endphp
 
 <header x-data="{ isMobileMenuOpen: false, mobileActiveDropdown: null }"
-    class="{{ $isFixed ? 'fixed' : 'sticky' }} top-0 left-0 right-0 z-50 bg-white"
+    class="w-full bg-white relative"
     style="font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;">
 
     <div class="w-full bg-[#105493]" style="background-color: #105493;">
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <nav aria-label="Main navigation" class="w-full border-b-2 border-[#D5A63F] bg-[#073B6B]"
+    <nav aria-label="Main navigation" class="sticky top-0 z-50 w-full border-b-2 border-[#D5A63F] bg-[#073B6B]"
         style="background-color: #073B6B; border-bottom: 2px solid #D5A63F;">
         <div class="mx-auto max-w-[1320px] px-4 lg:px-6">
             <button type="button" @click="isMobileMenuOpen = !isMobileMenuOpen" :aria-expanded="isMobileMenuOpen"
@@ -139,7 +139,3 @@
         </div>
     </nav>
 </header>
-
-@if ($isFixed)
-    <div class="w-full h-[180px] sm:h-[195px] lg:h-[205px]"></div>
-@endif

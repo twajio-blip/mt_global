@@ -247,6 +247,10 @@
                     class="active-trigger  {{ Route::is('header.footer.settings') ? 'sidebar-nav-active active-nav' : '' }}   relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Header Setting
                 </a>
             </li>
+            <li><a href="{{ route('sidebar.settings') }}"
+                    class="active-trigger  {{ Route::is('sidebar.settings') ? 'sidebar-nav-active active-nav' : '' }}   relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Sidebar Setting
+                </a>
+            </li>
             <li><a href="{{ route('font.index') }}"
                     class="active-trigger  {{ Route::is('font.index') ? 'sidebar-nav-active active-nav' : '' }}   relative inline-block w-full py-2.5 px-4 pl-14 before:absolute before:top-1/2 before:left-9 before:-translate-y-1/2 before:w-2 before:h-2 before:border-2 before:border-gray-600 before:rounded-full rounded-md hover:bg-skin-backend-accent hover:text-skin-invert transition-colors">Font
                     Setting

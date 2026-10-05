@@ -116,6 +116,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Store/update the header and footer settings (POST)
     Route::post('header-footer-settings', [SettingsController::class, 'storeHeaderFooterSettings'])
         ->name('header.footer.setting.store');
+
+    // Sidebar settings (GET & POST)
+    Route::get('sidebar-settings', [SettingsController::class, 'sidebarSettings'])
+        ->name('sidebar.settings');
+    Route::post('sidebar-settings', [SettingsController::class, 'storeSidebarSettings'])
+        ->name('sidebar.settings.store');
 });
 
 
