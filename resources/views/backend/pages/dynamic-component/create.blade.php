@@ -196,6 +196,9 @@
                                     class="checkbox bg-[#eaeaea] border-gray-200 rounded text-skin-hover focus:ring-0" />
                                 <label for="{{ $fieldName }}">{{ $label }}</label>
                             </div>
+                        @elseif($fieldType === 'date')
+                            <x-backend.input-date :name="$inputName" :id="$fieldName"
+                                :value="old($inputName)" class="w-full" :required="$isRequired" />
                         @else
                             @php
                                 $staticOpts = is_object($field) && ($field->static_options ?? null) ? (is_array($field->static_options) ? $field->static_options : json_decode($field->static_options, true)) : [];

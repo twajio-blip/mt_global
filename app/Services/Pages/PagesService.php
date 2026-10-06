@@ -182,9 +182,10 @@ class PagesService
                     ->where('component_id', $componentId)
                     ->first();
 
-                // If no display passed, default to 1 so frontend shows something
-                $dataViewNo = isset($prepared['display']) && $prepared['display'] !== ''
-                    ? (int) $prepared['display']
+                // If no valid display passed (>0), default to 1 so frontend shows something
+                $rawDisplay = $prepared['display'] ?? null;
+                $dataViewNo = (is_numeric($rawDisplay) && (int) $rawDisplay > 0)
+                    ? (int) $rawDisplay
                     : 1;
 
                 $payload = [
@@ -201,10 +202,12 @@ class PagesService
                     ]);
                 }
 
+                \App\Models\ComponentMaster::where('id', $componentId)->update(['limit' => $dataViewNo]);
+
                 // When adding to a real page (not hidden), create/update PageComponent so the component is on the page
                 $realPageId = !empty($prepared['page_id']) ? (int) $prepared['page_id'] : null;
                 if ($realPageId && $realPageId === $pageIdForStatus) {
-                    $limit = isset($prepared['display']) && $prepared['display'] !== '' ? (int) $prepared['display'] : 1;
+                    $limit = $dataViewNo;
                     PageComponent::updateOrCreate(
                         [
                             'page_id' => $realPageId,

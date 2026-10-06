@@ -28,6 +28,7 @@ if (!function_exists("input")) {
     {
         return [
             'text' => 'text',
+            'date' => 'date',
             'number' => 'number',
             'textarea' => 'textarea',
             'file' => 'file',

@@ -7,7 +7,7 @@
                 <span class="text-skin-backend-text-base text-opacity-50">Global Sidebar Settings</span>
             </h2>
             <p class="text-[14px] text-skin-backend-text-base text-opacity-50 max-w-2xl">
-                Manage the global Left Sidebar and Right Sidebar components that appear consistently across all pages.
+                Manage the global Left Sidebar and Right Sidebar components that appear consistently across all pages, and edit their field values.
             </p>
         </div>
 
@@ -31,17 +31,27 @@
                         <input type="text" class="filter-sidebar-items w-full bg-slate-900/60 text-xs text-white border border-gray-700 rounded-md pl-8 py-2 focus:outline-none focus:border-[#105493]" placeholder="Filter items in left sidebar..." data-target="#left-sidebar-sortable">
                     </div>
 
-                    <div id="left-sidebar-sortable" class="space-y-2 min-h-[160px] max-h-[360px] overflow-y-auto p-2 bg-slate-900/40 rounded-lg">
+                    <div id="left-sidebar-sortable" class="space-y-2 min-h-[160px] max-h-[400px] overflow-y-auto p-2 bg-slate-900/40 rounded-lg">
                         @foreach ($leftSidebar as $item)
+                            @php
+                                $compObj = $components->firstWhere('name', $item);
+                            @endphp
                             <div class="sidebar-item flex items-center justify-between py-3 px-4 bg-skin-backend-secondary border border-default border-opacity-25 rounded-[8px] cursor-grab">
                                 <div class="flex items-center gap-3">
                                     <i class="fa-solid fa-grip-vertical text-gray-400"></i>
                                     <span class="font-medium text-white item-name">{{ $item }}</span>
                                 </div>
-                                <input type="hidden" name="left_sidebar_components[]" value="{{ $item }}">
-                                <button type="button" class="remove-sidebar-item text-red-400 hover:text-red-300 p-1">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
+                                <div class="flex items-center gap-3">
+                                    @if($compObj)
+                                        <button type="button" data-name="{{ $item }}" data="{{ e(json_encode($compObj)) }}" class="edit-sidebar-component size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-blue-200 bg-blue-600 hover:bg-blue-500" title="Edit Component Fields">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                    @endif
+                                    <input type="hidden" name="left_sidebar_components[]" value="{{ $item }}">
+                                    <button type="button" class="remove-sidebar-item size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-red-200 bg-red-600 hover:bg-red-500" title="Remove Component">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -90,17 +100,27 @@
                         <input type="text" class="filter-sidebar-items w-full bg-slate-900/60 text-xs text-white border border-gray-700 rounded-md pl-8 py-2 focus:outline-none focus:border-[#D5A63F]" placeholder="Filter items in right sidebar..." data-target="#right-sidebar-sortable">
                     </div>
 
-                    <div id="right-sidebar-sortable" class="space-y-2 min-h-[160px] max-h-[360px] overflow-y-auto p-2 bg-slate-900/40 rounded-lg">
+                    <div id="right-sidebar-sortable" class="space-y-2 min-h-[160px] max-h-[400px] overflow-y-auto p-2 bg-slate-900/40 rounded-lg">
                         @foreach ($rightSidebar as $item)
+                            @php
+                                $compObj = $components->firstWhere('name', $item);
+                            @endphp
                             <div class="sidebar-item flex items-center justify-between py-3 px-4 bg-skin-backend-secondary border border-default border-opacity-25 rounded-[8px] cursor-grab">
                                 <div class="flex items-center gap-3">
                                     <i class="fa-solid fa-grip-vertical text-gray-400"></i>
                                     <span class="font-medium text-white item-name">{{ $item }}</span>
                                 </div>
-                                <input type="hidden" name="right_sidebar_components[]" value="{{ $item }}">
-                                <button type="button" class="remove-sidebar-item text-red-400 hover:text-red-300 p-1">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
+                                <div class="flex items-center gap-3">
+                                    @if($compObj)
+                                        <button type="button" data-name="{{ $item }}" data="{{ e(json_encode($compObj)) }}" class="edit-sidebar-component size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-blue-200 bg-blue-600 hover:bg-blue-500" title="Edit Component Fields">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                    @endif
+                                    <input type="hidden" name="right_sidebar_components[]" value="{{ $item }}">
+                                    <button type="button" class="remove-sidebar-item size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-red-200 bg-red-600 hover:bg-red-500" title="Remove Component">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -142,6 +162,17 @@
         </form>
     </div>
 
+    <!-- Hidden Component Registry for JS Lookup -->
+    <script>
+        window._sidebarComponentRegistry = {
+            @foreach($components as $comp)
+                "{{ $comp->name }}": {!! json_encode($comp) !!},
+            @endforeach
+        };
+    </script>
+
+    @include('backend.pages.pages.model.field-data-model')
+
     @if ($message = Session::get('success'))
         <x-backend.flash-error :message="$message" :type="'success'" />
     @endif
@@ -155,6 +186,33 @@
         // Remove item
         $(document).on('click', '.remove-sidebar-item', function() {
             $(this).closest('.sidebar-item').remove();
+        });
+
+        // Edit component fields modal trigger
+        $(document).on('click', '.edit-sidebar-component', function() {
+            let compName = $(this).attr('data-name') || $(this).closest('.sidebar-item').find('.item-name').text().trim();
+            let data = (window._sidebarComponentRegistry && window._sidebarComponentRegistry[compName]) ? window._sidebarComponentRegistry[compName] : null;
+
+            if (!data) {
+                let rawData = $(this).attr('data');
+                if (rawData) {
+                    try {
+                        let unescaped = rawData.replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+                        data = JSON.parse(unescaped);
+                    } catch (e) {
+                        console.error('Could not parse component data', e);
+                    }
+                }
+            }
+
+            if (!data) return;
+
+            let dummy = $('<button class="add-field-value hidden"></button>');
+            dummy.attr('data', JSON.stringify(data));
+            dummy.attr('dataBase', '');
+            $('body').append(dummy);
+            dummy.trigger('click');
+            setTimeout(() => dummy.remove(), 500);
         });
 
         // Live Filter in List
@@ -176,16 +234,26 @@
         $('#btn-add-left').on('click', function() {
             let val = $('#left-add-name').val().trim();
             if (val) {
+                let compObj = window._sidebarComponentRegistry[val] || null;
+                let editBtnHtml = compObj ? `
+                    <button type="button" data="${JSON.stringify(compObj).replace(/"/g, '&quot;')}" class="edit-sidebar-component size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-blue-200 bg-blue-600 hover:bg-blue-500" title="Edit Component Fields">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                ` : '';
+
                 let html = `
                     <div class="sidebar-item flex items-center justify-between py-3 px-4 bg-skin-backend-secondary border border-default border-opacity-25 rounded-[8px] cursor-grab">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-grip-vertical text-gray-400"></i>
                             <span class="font-medium text-white item-name">${val}</span>
                         </div>
-                        <input type="hidden" name="left_sidebar_components[]" value="${val}">
-                        <button type="button" class="remove-sidebar-item text-red-400 hover:text-red-300 p-1">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            ${editBtnHtml}
+                            <input type="hidden" name="left_sidebar_components[]" value="${val}">
+                            <button type="button" class="remove-sidebar-item size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-red-200 bg-red-600 hover:bg-red-500" title="Remove Component">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 $('#left-sidebar-sortable').append(html);
@@ -197,16 +265,26 @@
         $('#btn-add-right').on('click', function() {
             let val = $('#right-add-name').val().trim();
             if (val) {
+                let compObj = window._sidebarComponentRegistry[val] || null;
+                let editBtnHtml = compObj ? `
+                    <button type="button" data="${JSON.stringify(compObj).replace(/"/g, '&quot;')}" class="edit-sidebar-component size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-blue-200 bg-blue-600 hover:bg-blue-500" title="Edit Component Fields">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                ` : '';
+
                 let html = `
                     <div class="sidebar-item flex items-center justify-between py-3 px-4 bg-skin-backend-secondary border border-default border-opacity-25 rounded-[8px] cursor-grab">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-grip-vertical text-gray-400"></i>
                             <span class="font-medium text-white item-name">${val}</span>
                         </div>
-                        <input type="hidden" name="right_sidebar_components[]" value="${val}">
-                        <button type="button" class="remove-sidebar-item text-red-400 hover:text-red-300 p-1">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            ${editBtnHtml}
+                            <input type="hidden" name="right_sidebar_components[]" value="${val}">
+                            <button type="button" class="remove-sidebar-item size-7 inline-flex justify-center items-center text-xs font-semibold rounded-full border border-transparent text-red-200 bg-red-600 hover:bg-red-500" title="Remove Component">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 $('#right-sidebar-sortable').append(html);

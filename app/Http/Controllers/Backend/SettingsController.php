@@ -106,7 +106,15 @@ class SettingsController extends Controller
     public function sidebarSettings(Request $request)
     {
         $general = General::first();
-        $components = \App\Models\ComponentMaster::orderBy('name')->get();
+        $hiddenPageId = \App\Services\Pages\PagesService::createHiddenPage();
+        $components = \App\Models\ComponentMaster::with([
+            'componentFiled',
+            'componentFiledPageWise',
+            'limits',
+            'pageStatus' => function ($query) use ($hiddenPageId) {
+                $query->where('page_id', $hiddenPageId);
+            }
+        ])->orderBy('name')->get();
 
         $leftSidebar = $general->left_sidebar_components ?? ['PrayerTimes', 'LeaderMessage', 'LatestNotices'];
         $rightSidebar = $general->right_sidebar_components ?? ['NBRLinks', 'PortLinks', 'CurrencyConverter', 'CondolenceWidget', 'LinkListModule'];

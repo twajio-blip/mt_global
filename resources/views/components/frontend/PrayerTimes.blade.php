@@ -5,7 +5,7 @@
 @endphp
 
 <section class="overflow-hidden rounded-[5px] border border-[#D8E0E6] bg-white">
-    <h2 class="bg-[#105493] px-3 py-2 text-[14px] font-semibold uppercase tracking-wide text-white">
+    <h2 class="bg-[#105493] px-3 py-[9px] text-[14px] font-semibold uppercase tracking-wide text-white">
         {{ $title }}
     </h2>
     <div id="{{ $uniqueId }}" class="p-3 text-[14px] leading-relaxed text-[#1E2933]">
@@ -20,11 +20,11 @@
 </section>
 
 <script>
-    (function() {
+    (function () {
         const widget = document.getElementById('{{ $uniqueId }}');
         if (!widget) return;
 
-        const enToBn = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+        const enToBn = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' };
         const bnMonthsByNumber = {
             1: 'মুহররম',
             2: 'সফর',
@@ -65,8 +65,8 @@
                 // 1. Format Gregorian Date
                 const [day, month, year] = apiData.date.gregorian.date.split('-');
                 const gDate = new Date(`${year}-${month}-${day}`);
-                const gregorianFormat = gDate.toLocaleDateString('en-GB', { 
-                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+                const gregorianFormat = gDate.toLocaleDateString('en-GB', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
                 });
 
                 // 2. Format Hijri Date to Bengali

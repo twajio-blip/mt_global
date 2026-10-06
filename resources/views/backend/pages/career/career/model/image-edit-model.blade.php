@@ -13,7 +13,7 @@
         <x-backend.input-field type="text" name="sallery" id='sallery' :value="old('sallery')"
             placeholder="Enter sallery" />
         <x-backend.input-label :value="__('Deadline')" for="deadline" />
-        <x-backend.input-field type="date" name="deadline" id='deadline' :value="old('deadline')"
+        <x-backend.input-date name="deadline" id='deadline' :value="old('deadline')"
             placeholder="Enter deadline date" />
         <x-backend.input-label :value="__('Vacancy')" for="vacancy" />
         <x-backend.input-field type="number" name="vacancy" id='vacancy' :value="old('vacancy')"

@@ -95,7 +95,7 @@ class PageController extends Controller
      * - If group is NOT multiple: fields are flattened (group_name + field keys, no instances array).
      * - If group IS multiple: group has group_name + instances array.
      */
-    protected function toFrontendComponentFormat(array $groupWiseData, int $componentId, int $pageId, int $totalPage, array $schemaGroupSettings = []): array
+    protected function toFrontendComponentFormat(array $groupWiseData, int $componentId, int $pageId, int $totalPage, array $schemaGroupSettings = [], ?int $limitNo = null): array
     {
         $out = [];
         ksort($groupWiseData);
@@ -131,6 +131,15 @@ class PageController extends Controller
                 }
                 $instanceIndex[$sg]++;
                 $bySchemaGroup[$sg]['instances'][$instanceIndex[$sg]] = $instanceData;
+            }
+
+            // Slice instances if limitNo is provided (>0)
+            if ($limitNo !== null && (int)$limitNo > 0) {
+                foreach ($bySchemaGroup as $sg => $groupData) {
+                    if (isset($groupData['instances']) && is_array($groupData['instances']) && count($groupData['instances']) > $limitNo) {
+                        $bySchemaGroup[$sg]['instances'] = array_slice($groupData['instances'], 0, $limitNo, true);
+                    }
+                }
             }
 
             // For non-multiple groups: flatten single instance (no instances array)
@@ -286,7 +295,7 @@ class PageController extends Controller
             } elseif ($howManyParentShowDefault != 0) {
                 $component->componentFiled = collect($component->componentFiled()->Paginate($howManyParentShowDefault)->items());
             } else {
-                $component->componentFiled = collect([]);
+                $component->componentFiled = $component->componentFiled()->get();
             }
 
             if ($howManyDataShowCustom != 0) {
@@ -294,7 +303,7 @@ class PageController extends Controller
             } elseif ($howManyParentShowCustom != 0) {
                 $component->componentFiledPageWise = collect($component->componentFiledPageWise()->where('page_id', $page->id)->Paginate($howManyParentShowCustom)->items());
             } else {
-                $component->componentFiledPageWise = collect([]);
+                $component->componentFiledPageWise = $component->componentFiledPageWise()->where('page_id', $page->id)->get();
             }
 
             return $component;
@@ -344,10 +353,29 @@ class PageController extends Controller
                     }
                 }
 
+                if (count($fields) == 0) {
+                    $fields = ComponentField::where('component_id', $source->id)->orderBy('group')->orderBy('position')->get();
+                }
+
                 // When connected, use source component's template for relationship resolution (so category/brand show names, not IDs)
                 $templateComponent = ($component->is_connected ?? false) && ($component->data_source_component_id ?? null) ? $source : $component;
                 $groupWiseData = $this->buildGroupWiseComponentData($fields, $templateComponent, $page->id);
 
+                $dataViewNo = null;
+                if ($matchData && !empty($matchData->data_view_no) && (int)$matchData->data_view_no > 0) {
+                    $dataViewNo = (int) $matchData->data_view_no;
+                } elseif (!empty($component->limit) && (int)$component->limit > 0) {
+                    $dataViewNo = (int) $component->limit;
+                } else {
+                    $hiddenStatus = \App\Models\PageComponentStatus::where('component_id', $component->id)
+                        ->where('page_id', \App\Services\Pages\PagesService::createHiddenPage())
+                        ->first();
+                    if ($hiddenStatus && !empty($hiddenStatus->data_view_no) && (int)$hiddenStatus->data_view_no > 0) {
+                        $dataViewNo = (int) $hiddenStatus->data_view_no;
+                    } elseif (!empty($component->limits?->limit) && (int)$component->limits->limit > 0) {
+                        $dataViewNo = (int) $component->limits->limit;
+                    }
+                }
                 // Pass schema_group_settings so we know which groups are multiple.
                 // - If is_multiple = true  => always expose "instances" array (even single item).
                 // - If is_multiple = false => flatten to a single group (no "instances" key).
@@ -360,7 +388,8 @@ class PageController extends Controller
                     $component->id,
                     $page->id,
                     $totalPage,
-                    $schemaGroupSettings
+                    $schemaGroupSettings,
+                    $dataViewNo !== null ? (int) $dataViewNo : null
                 );
 
                 // Build related data blocks for index view (same logic as dataView)
@@ -482,6 +511,100 @@ class PageController extends Controller
         }
 
         if ($page) {
+            $generalSettings = \App\Models\General::first();
+            $leftKeys = is_array($generalSettings?->left_sidebar_components)
+                ? $generalSettings->left_sidebar_components
+                : ['PrayerTimes', 'LeaderMessage', 'LatestNotices'];
+            $rightKeys = is_array($generalSettings?->right_sidebar_components)
+                ? $generalSettings->right_sidebar_components
+                : ['NBRLinks', 'PortLinks', 'CurrencyConverter', 'CondolenceWidget', 'LinkListModule'];
+            $sidebarComponentNames = array_unique(array_merge($leftKeys, $rightKeys));
+
+            foreach ($sidebarComponentNames as $sidebarName) {
+                if (!isset($components[$sidebarName])) {
+                    $nameVariants = [
+                        $sidebarName,
+                        str_replace('Widget', '', $sidebarName),
+                        str_replace('Links', 'Information', $sidebarName),
+                        str_replace('Notices', 'Notice', $sidebarName),
+                        rtrim($sidebarName, 's'),
+                    ];
+                    if (str_starts_with($sidebarName, 'NBR')) {
+                        $nameVariants[] = 'NbrInformation';
+                    }
+                    if (str_starts_with($sidebarName, 'Port')) {
+                        $nameVariants[] = 'PortInformation';
+                    }
+
+                    $sidebarComp = ComponentMaster::whereIn('name', array_unique($nameVariants))->first();
+                    if ($sidebarComp) {
+                        $hiddenPageId = \App\Services\Pages\PagesService::createHiddenPage();
+                        $hiddenStatus = \App\Models\PageComponentStatus::where('component_id', $sidebarComp->id)
+                            ->where('page_id', $hiddenPageId)
+                            ->first();
+
+                        $limitNo = null;
+                        if ($hiddenStatus && !empty($hiddenStatus->data_view_no) && (int)$hiddenStatus->data_view_no > 0) {
+                            $limitNo = (int) $hiddenStatus->data_view_no;
+                        } elseif (!empty($sidebarComp->limit) && (int)$sidebarComp->limit > 0) {
+                            $limitNo = (int) $sidebarComp->limit;
+                        } else {
+                            $statusRec = \App\Models\PageComponentStatus::where('component_id', $sidebarComp->id)
+                                ->where('page_id', $page->id)
+                                ->first();
+                            if ($statusRec && !empty($statusRec->data_view_no) && (int)$statusRec->data_view_no > 0) {
+                                $limitNo = (int) $statusRec->data_view_no;
+                            } elseif (!empty($sidebarComp->limits?->limit) && (int)$sidebarComp->limits->limit > 0) {
+                                $limitNo = (int) $sidebarComp->limits->limit;
+                            }
+                        }
+
+                        $pageWiseFields = ComponentField::where('component_id', $sidebarComp->id)
+                            ->where('page_id', $page->id)
+                            ->orderBy('group')
+                            ->orderBy('position')
+                            ->get();
+
+                        $hiddenFields = ComponentField::where('component_id', $sidebarComp->id)
+                            ->where('page_id', $hiddenPageId)
+                            ->orderBy('group')
+                            ->orderBy('position')
+                            ->get();
+
+                        $globalFields = $sidebarComp->componentFiled()->get();
+
+                        $pageOverridden = $pageWiseFields->pluck('group')->unique();
+                        $hiddenOverridden = $hiddenFields->pluck('group')->unique();
+
+                        $fields = $globalFields->filter(fn($f) => !$hiddenOverridden->contains($f->group) && !$pageOverridden->contains($f->group))
+                            ->concat($hiddenFields->filter(fn($f) => !$pageOverridden->contains($f->group)))
+                            ->concat($pageWiseFields);
+
+                        if ($fields->isEmpty()) {
+                            $fields = ComponentField::where('component_id', $sidebarComp->id)
+                                ->orderBy('group')
+                                ->orderBy('position')
+                                ->get();
+                        }
+
+                        $groupWiseData = $this->buildGroupWiseComponentData($fields, $sidebarComp, $page->id);
+
+                        $schemaGroupSettings = is_array($sidebarComp->schema_group_settings ?? null)
+                            ? $sidebarComp->schema_group_settings
+                            : [];
+                        $formattedData = $this->toFrontendComponentFormat(
+                            $groupWiseData,
+                            $sidebarComp->id,
+                            $page->id,
+                            1,
+                            $schemaGroupSettings,
+                            $limitNo !== null ? (int) $limitNo : null
+                        );
+                        $components[$sidebarName] = $formattedData;
+                        $components[$sidebarComp->name] = $formattedData;
+                    }
+                }
+            }
 
             return view('pages', compact('components', 'page'));
         } else {

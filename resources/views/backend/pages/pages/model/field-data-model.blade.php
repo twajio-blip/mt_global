@@ -45,12 +45,10 @@
                 color: "#ffffff"       // light text color
             }).then((result) => {
                 if (result.isConfirmed) {
-                    if (data.component_filed_page_wise.length != 0) {
+                    if (data.component_filed_page_wise && data.component_filed_page_wise.length > 0) {
                         value = data.component_filed_page_wise;
-
                     } else {
-                        value = data.component_filed;
-
+                        value = data.component_filed || [];
                     }
 
                     fileds.push(`<input type="hidden" name='status' value="1" >`)
@@ -59,13 +57,17 @@
                     }
                     if (window.openBackendModalBySelector) {
                         window.openBackendModalBySelector('#field-model');
+                    } else {
+                        $('#field-model').removeClass('hidden').addClass('open opened');
                     }
                 } else {
-                    value = data.component_filed;
+                    value = data.component_filed || [];
                     // Default mode = use GLOBAL data (no page_id for fields)
                     fileds.push(`<input type="hidden" name='status' value="0" >`)
                     if (window.openBackendModalBySelector) {
                         window.openBackendModalBySelector('#field-model');
+                    } else {
+                        $('#field-model').removeClass('hidden').addClass('open opened');
                     }
                 }
                 fileds.push(`<input type="hidden" name='component_id' value="${data.id}" >`)
@@ -77,20 +79,17 @@
                 // Use component template (component_filed) to decide if "Number of displays" applies,
                 // so it shows for both Default and Custom even when page-wise data is empty.
                 const templateFields = data.component_filed || [];
-                const countfield = templateFields.filter((element) => {
-                    return element.group == 1;
-                });
 
                 const hasChild =
-                    countfield.length > 0 ||
+                    templateFields.length > 0 ||
                     (data.set_from === 'database' && data.database) ||
-                    !!data.is_connected; // always allow number of displays for connected components
+                    !!data.is_connected ||
+                    true; // Always allow setting number of displays for components
 
                 if (hasChild) {
                     $('#field-model .static').removeClass('hidden');
                 } else {
-                    $('#field-model .static').addClass('hidden');
-                    $('#field-model #display').val(0);
+                    $('#field-model .static').removeClass('hidden');
                 }
 
                 fileds.push(`<input type="hidden" name='id' value='${data.id}'>`)
@@ -330,17 +329,21 @@
                 });
 
                 // Decide initial "Number of displays":
-                // 1) Use existing page_status.data_view_no if present
-                // 2) Else use component default limit (data.limits.limit) if available
-                // 3) Else fallback to 1 so frontend shows something
-                let initDisplay;
-                if (data.page_status && data.page_status.data_view_no != null && data.page_status.data_view_no !== 'null') {
-                    initDisplay = data.page_status.data_view_no;
-                } else if (data.limits && typeof data.limits.limit !== 'undefined' && data.limits.limit !== null) {
-                    initDisplay = data.limits.limit;
+                // 1) Use existing page_status.data_view_no if present (>0)
+                // 2) Else use component master limit (data.limit) if present (>0)
+                // 3) Else use page component limit (data.limits.limit) if present (>0)
+                // 4) Fallback to 1
+                let initDisplay = 1;
+                if (data.page_status && data.page_status.data_view_no != null && data.page_status.data_view_no !== 'null' && Number(data.page_status.data_view_no) > 0) {
+                    initDisplay = Number(data.page_status.data_view_no);
+                } else if (data.limit != null && data.limit !== 'null' && Number(data.limit) > 0) {
+                    initDisplay = Number(data.limit);
+                } else if (data.limits && typeof data.limits.limit !== 'undefined' && data.limits.limit !== null && Number(data.limits.limit) > 0) {
+                    initDisplay = Number(data.limits.limit);
                 } else {
                     initDisplay = 1;
                 }
+                $('#field-model .static').removeClass('hidden');
                 $('#field-model .static').find('#display').val(initDisplay);
                 $('#field-model .field').html(fileds);
             });
@@ -396,10 +399,17 @@
             let thisElement = $(this)
             form.append('_token', $('input[name="_token"]').val());
 
-            // Normalize empty field values so backend gets a consistent \"null\" string.
-            // This helps distinguish between \"not sent\" and \"sent but empty\".
+            // Normalize empty field values so backend gets a consistent "null" string.
+            // Distinguish display input so it defaults to valid number (never "null" or 0)
             for (let [key, value] of form.entries()) {
-                if (typeof value === 'string' && value.trim() === '') {
+                if (key === 'display') {
+                    let num = parseInt(value, 10);
+                    if (isNaN(num) || num <= 0) {
+                        form.set('display', '1');
+                    } else {
+                        form.set('display', String(num));
+                    }
+                } else if (typeof value === 'string' && value.trim() === '') {
                     form.set(key, 'null');
                 }
             }
@@ -429,6 +439,26 @@
                 }
                 if (window.cleanupBackendModalState) {
                     window.cleanupBackendModalState();
+                }
+
+                // Update component registry and data attributes for sidebar edit buttons
+                if (Array.isArray(json.component)) {
+                    json.component.forEach(compObj => {
+                        if (window._sidebarComponentRegistry) {
+                            window._sidebarComponentRegistry[compObj.name] = compObj;
+                        }
+                        $('.edit-sidebar-component').each(function() {
+                            let raw = $(this).attr('data');
+                            if (raw) {
+                                try {
+                                    let parsed = JSON.parse(raw);
+                                    if (parsed.id === compObj.id || parsed.name === compObj.name) {
+                                        $(this).attr('data', JSON.stringify(compObj));
+                                    }
+                                } catch(e) {}
+                            }
+                        });
+                    });
                 }
 
                 let data = [];

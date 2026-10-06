@@ -18,11 +18,21 @@
             {{-- Left Sidebar: Sticky 260px --}}
             <aside aria-label="Association information" class="hidden shrink-0 space-y-5 lg:block lg:w-[260px] lg:sticky lg:top-[68px] self-start">
                 @foreach ($leftKeys as $lk)
-                    @if (isset($components[$lk]))
-                        @component('components.frontend.' . $lk, ['data' => $components[$lk]])
+                    @php
+                        $vName = $lk;
+                        if (!view()->exists('components.frontend.' . $vName)) {
+                            $mapped = str_replace(['Widget', 'Links', 'Notices'], ['', 'Information', 'Notice'], $vName);
+                            if (str_starts_with($vName, 'NBR')) { $mapped = 'NbrInformation'; }
+                            if (str_starts_with($vName, 'Port')) { $mapped = 'PortInformation'; }
+                            if (view()->exists('components.frontend.' . $mapped)) { $vName = $mapped; }
+                        }
+                        $cData = $components[$lk] ?? $components[$vName] ?? null;
+                    @endphp
+                    @if ($cData && view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName, ['data' => $cData])
                         @endcomponent
-                    @elseif (view()->exists('components.frontend.' . $lk))
-                        @component('components.frontend.' . $lk)
+                    @elseif (view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName)
                         @endcomponent
                     @endif
                 @endforeach
@@ -49,11 +59,21 @@
             {{-- Right Sidebar: Sticky 260px --}}
             <aside aria-label="Regulatory and service information" class="hidden shrink-0 space-y-5 lg:block lg:w-[260px] lg:sticky lg:top-[68px] self-start">
                 @foreach ($rightKeys as $rk)
-                    @if (isset($components[$rk]))
-                        @component('components.frontend.' . $rk, ['data' => $components[$rk]])
+                    @php
+                        $vName = $rk;
+                        if (!view()->exists('components.frontend.' . $vName)) {
+                            $mapped = str_replace(['Widget', 'Links', 'Notices'], ['', 'Information', 'Notice'], $vName);
+                            if (str_starts_with($vName, 'NBR')) { $mapped = 'NbrInformation'; }
+                            if (str_starts_with($vName, 'Port')) { $mapped = 'PortInformation'; }
+                            if (view()->exists('components.frontend.' . $mapped)) { $vName = $mapped; }
+                        }
+                        $cData = $components[$rk] ?? $components[$vName] ?? null;
+                    @endphp
+                    @if ($cData && view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName, ['data' => $cData])
                         @endcomponent
-                    @elseif (view()->exists('components.frontend.' . $rk))
-                        @component('components.frontend.' . $rk)
+                    @elseif (view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName)
                         @endcomponent
                     @endif
                 @endforeach
@@ -64,22 +84,42 @@
         <div class="mt-5 grid gap-5 md:grid-cols-2 lg:hidden">
             <div class="space-y-5">
                 @foreach ($leftKeys as $lk)
-                    @if (isset($components[$lk]))
-                        @component('components.frontend.' . $lk, ['data' => $components[$lk]])
+                    @php
+                        $vName = $lk;
+                        if (!view()->exists('components.frontend.' . $vName)) {
+                            $mapped = str_replace(['Widget', 'Links', 'Notices'], ['', 'Information', 'Notice'], $vName);
+                            if (str_starts_with($vName, 'NBR')) { $mapped = 'NbrInformation'; }
+                            if (str_starts_with($vName, 'Port')) { $mapped = 'PortInformation'; }
+                            if (view()->exists('components.frontend.' . $mapped)) { $vName = $mapped; }
+                        }
+                        $cData = $components[$lk] ?? $components[$vName] ?? null;
+                    @endphp
+                    @if ($cData && view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName, ['data' => $cData])
                         @endcomponent
-                    @elseif (view()->exists('components.frontend.' . $lk))
-                        @component('components.frontend.' . $lk)
+                    @elseif (view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName)
                         @endcomponent
                     @endif
                 @endforeach
             </div>
             <div class="space-y-5">
                 @foreach ($rightKeys as $rk)
-                    @if (isset($components[$rk]))
-                        @component('components.frontend.' . $rk, ['data' => $components[$rk]])
+                    @php
+                        $vName = $rk;
+                        if (!view()->exists('components.frontend.' . $vName)) {
+                            $mapped = str_replace(['Widget', 'Links', 'Notices'], ['', 'Information', 'Notice'], $vName);
+                            if (str_starts_with($vName, 'NBR')) { $mapped = 'NbrInformation'; }
+                            if (str_starts_with($vName, 'Port')) { $mapped = 'PortInformation'; }
+                            if (view()->exists('components.frontend.' . $mapped)) { $vName = $mapped; }
+                        }
+                        $cData = $components[$rk] ?? $components[$vName] ?? null;
+                    @endphp
+                    @if ($cData && view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName, ['data' => $cData])
                         @endcomponent
-                    @elseif (view()->exists('components.frontend.' . $rk))
-                        @component('components.frontend.' . $rk)
+                    @elseif (view()->exists('components.frontend.' . $vName))
+                        @component('components.frontend.' . $vName)
                         @endcomponent
                     @endif
                 @endforeach
