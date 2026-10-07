@@ -83,6 +83,7 @@
                                                     aria-haspopup="dialog" aria-expanded="false"
                                                     aria-controls="hs-danger-alert"
                                                     data-hs-overlay="#hs-danger-alert"
+                                                    data-delete-action="{{ route('pages.destroy', $page->id) }}"
                                                     class="delete-btn gap-x-1 text-xs decoration-2 font-medium inline-flex no-underline items-center justify-center w-[26px] h-[26px] rounded-full bg-[#E61714]">
                                                     <i class=" fa-solid fa-trash-can"></i>
                                                 </button>

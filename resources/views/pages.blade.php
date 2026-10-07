@@ -1,8 +1,4 @@
 <x-Guest-layout :pageinfo="$page">
-    @if ((int) $page->is_breadcrumb && view()->exists('components.frontend.breadcrumbs'))
-        <x-frontend.breadcrumbs :data="$page" />
-    @endif
-
     @php
         $leftKeys = is_array($general->left_sidebar_components ?? null) 
             ? $general->left_sidebar_components 
@@ -40,6 +36,9 @@
 
             {{-- Middle Main Column: Flexible width (flex-1), page-specific content --}}
             <main class="min-w-0 lg:flex-1 space-y-5">
+                @if ((int) $page->is_breadcrumb && view()->exists('components.frontend.breadcrumbs'))
+                    <x-frontend.breadcrumbs :data="$page" />
+                @endif
                 @foreach ($components as $key => $component)
                     @if (!in_array($key, $allSidebarKeys))
                         @if (view()->exists('components.frontend.' . $key))

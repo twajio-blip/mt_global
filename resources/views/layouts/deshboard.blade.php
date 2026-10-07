@@ -31,7 +31,50 @@
     <script src="{{ asset('magnific-popup/magnific-popup.js') }}"></script>
     {{-- Apex chart --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- javascript file -->
+    <!-- SunEditor CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/css/suneditor.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/suneditor@latest/dist/suneditor.min.js"></script>
+    <script>
+        window.applyTextEditor = function(initialize) {
+            if (typeof SUNEDITOR === 'undefined') {
+                return;
+            }
+            var id = (String(initialize)).replace(/^#/, '');
+            var el = document.getElementById(id);
+            if (!el || el._sunEditor) {
+                return;
+            }
+            var editor = SUNEDITOR.create(el, {
+                defaultStyle: 'font-family: Arial, sans-serif; font-size: 14px;',
+                buttonList: [
+                    ['undo', 'redo', 'font', 'fontSize', 'formatBlock'],
+                    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript', 'removeFormat'],
+                    ['fontColor', 'hiliteColor', 'textStyle', 'removeFormat'],
+                    ['align', 'list', 'lineHeight', 'table', 'link', 'image'],
+                    ['fullScreen', 'showBlocks', 'codeView'],
+                    ['horizontalRule', 'template', 'blockquote', 'indent', 'outdent'],
+                ],
+                table: {
+                    maxWidth: '100%',
+                    maxHeight: '300px',
+                    resize: true
+                },
+                imageUploadSizeLimit: 2 * 1024 * 1024,
+                font: ['Arial', 'Comic Sans MS', 'Courier New', 'Georgia', 'Tahoma', 'Trebuchet MS', 'Verdana'],
+                fontSize: ['8', '10', '12', '14', '16', '18', '20', '24', '28', '32', '36', '40', '46', '52', '58', '64', '70', '76', '82', '88', '94', '100', '106', '112', '118', '120'],
+                mode: 'classic',
+                height: '200px',
+                colorList: null
+            });
+            el._sunEditor = editor;
+
+            editor.onChange = function(contents) {
+                el.value = contents;
+            };
+            return editor;
+        };
+    </script>
+
     @yield('css')
 
     <!-- Scripts -->

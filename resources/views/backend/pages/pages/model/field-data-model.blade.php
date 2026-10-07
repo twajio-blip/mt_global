@@ -110,21 +110,14 @@
                     let elementId = element.id;
 
                     if (element.group == null) {
-                        if (element.type == "textarea") {
-                            fileds.push(` <div class='list'>
-                    <x-backend.input-label :value="'${elementName}'" for="${element.name}" />
-                    <x-backend.input-textarea name="field_name[]"   :text="'${element.value ?? textarea}'" placeholder='Enter ${elementName}' />
-                    <x-backend.input-field value='${element.id}' type="hidden" name="field_id[]"  
-                        placeholder="''"   />
-                        </div>`);
-                        } else if (element.type == "textEditor") {
+                        if (element.type == "textarea" || element.type == "textEditor" || element.type == "texteditor" || (element.type && element.type.toLowerCase().includes("editor"))) {
                             fileds.push(`
                             <div class='list'>
                                 <x-backend.input-label :value="'${elementName}'" for="${element.name}" />
                                 <textarea 
                                     id="editor-${element.id}" 
                                     name="field_name[]" 
-                                    class='w-full abcd'
+                                    class='w-full abcd min-h-[150px] p-2 bg-skin-backend-secondary border border-default border-opacity-25 rounded-md text-skin-backend-text-base'
                                     placeholder="Enter ${elementName}" 
                                     >${element.value ?? textarea}</textarea>
                                 <x-backend.input-field 
@@ -135,13 +128,6 @@
                                 />
                             </div>
                         `);
-
-
-                            // Initialize the text editor after the content is added
-                            setTimeout(() => {
-                                applyTextEditor(`editor-${element.id}`)
-                            }, 100); // Delay to ensure the DOM is updated
-
                         } else if (element.type == "file") {
                             fileds.push(`
                         
@@ -206,14 +192,7 @@
                         arraySet.push(element)
                         group = element.group;
                         textarea = '';
-                        if (element.type == "textarea") {
-                            sub_fileds = sub_fileds + ` <div class='list'>
-                    <x-backend.input-label :value="'${elementName}'" for="${element.name}" />
-                    <x-backend.input-textarea   name="subfield[${element.group}][${element.name}]" :text="'${element.value ?? textarea}'" placeholder='Enter ${element.name}' />
-                    <x-backend.input-field value='${element.id}' type="hidden" name="sub_field_id[]"  
-                        placeholder="''"   />
-                        </div>`;
-                        } else if (element.type == "textEditor") {
+                        if (element.type == "textarea" || element.type == "textEditor" || element.type == "texteditor" || (element.type && element.type.toLowerCase().includes("editor"))) {
 
                             sub_fileds += `
                                 <div class='list'>
@@ -221,6 +200,7 @@
                                     <textarea 
                                         id="editor-${elementId}" 
                                         name="subfield[${element.group}][${element.name}]" 
+                                        class='w-full abcd min-h-[150px] p-2 bg-skin-backend-secondary border border-default border-opacity-25 rounded-md text-skin-backend-text-base'
                                         placeholder="Enter ${element.name}" 
                                         >${element.value ?? textarea}</textarea>
                                     <x-backend.input-field 
@@ -236,7 +216,7 @@
 
                             setTimeout(() => {
                                 applyTextEditor(`editor-${elementId}`)
-                            }, 100);
+                            }, 200);
 
 
 
@@ -346,6 +326,17 @@
                 $('#field-model .static').removeClass('hidden');
                 $('#field-model .static').find('#display').val(initDisplay);
                 $('#field-model .field').html(fileds);
+
+                setTimeout(() => {
+                    $('#field-model').find('textarea').each(function(idx) {
+                        if (!this.id) {
+                            this.id = 'editor-field-' + idx + '-' + Date.now();
+                        }
+                        if (typeof applyTextEditor === 'function') {
+                            applyTextEditor(this.id);
+                        }
+                    });
+                }, 200);
             });
 
 
@@ -366,12 +357,28 @@
 
             icone.html(content.css('display') == 'block' ? '<i class="fa-solid fa-plus"></i>' :
                 '<i class="fa-solid fa-minus"></i>');
-            content.slideToggle(200);
+            content.slideToggle(200, function() {
+                content.find('textarea').each(function(idx) {
+                    if (!this.id) {
+                        this.id = 'editor-field-sub-' + idx + '-' + Date.now();
+                    }
+                    if (typeof applyTextEditor === 'function') {
+                        applyTextEditor(this.id);
+                    }
+                });
+            });
         });
 
         // Ui Element Store 
         $(document).on('submit', '#pages-ui', function(e) {
-            e.preventDefault()
+            e.preventDefault();
+
+            $('#field-model').find('textarea').each(function() {
+                if (this._sunEditor && typeof this._sunEditor.getContents === 'function') {
+                    this.value = this._sunEditor.getContents();
+                }
+            });
+
             let page_id = $('#pages-edit').attr('page-id');
 
             

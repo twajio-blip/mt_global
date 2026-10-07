@@ -143,7 +143,7 @@
                             @endif
                         @elseif($fieldType === 'textarea')
                             <x-backend.input-textarea :name="$inputName" :id="$fieldName" :text="$value" :placeholder="'Enter ' . $label" :required="$isRequired" />
-                        @elseif($fieldType === 'textEditor')
+                        @elseif($fieldType === 'textEditor' || strtolower($fieldType) === 'texteditor')
                             @php $textEditorId = 'texteditor-' . $schemaGroup . '-' . $instanceId . '-' . $fieldName; @endphp
                             <x-backend.textEditor
                                 :id="$textEditorId"
