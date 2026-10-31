@@ -15,6 +15,7 @@ class CvWorkExperience extends Model
         'job_title',
         'company',
         'country',
+        'salary',
         'start_date',
         'end_date',
         'is_current',

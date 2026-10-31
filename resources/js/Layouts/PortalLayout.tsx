@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import React, { useState } from "react";
+import { Link, usePage } from "@inertiajs/react";
 import {
     LayoutDashboardIcon,
     BriefcaseIcon,
@@ -11,9 +11,9 @@ import {
     LogOutIcon,
     MenuIcon,
     XIcon,
-} from 'lucide-react';
-import { BrandLogo } from '../Components/BrandLogo';
-import { initials } from '../utils/format';
+} from "lucide-react";
+import { BrandLogo } from "../Components/BrandLogo";
+import { initials } from "../utils/format";
 
 interface PortalLayoutProps {
     children: React.ReactNode;
@@ -21,47 +21,52 @@ interface PortalLayoutProps {
 
 const navItems = [
     {
-        href: '/portal/dashboard',
-        label: 'Dashboard',
+        href: "/portal/dashboard",
+        label: "Dashboard",
         icon: LayoutDashboardIcon,
-        match: (p: string) => p === '/portal' || p === '/portal/dashboard',
+        match: (p: string) => p === "/portal" || p === "/portal/dashboard",
     },
     {
-        href: '/portal/jobs',
-        label: 'Jobs',
+        href: "/portal/jobs",
+        label: "Jobs",
         icon: BriefcaseIcon,
-        match: (p: string) => p.startsWith('/portal/jobs') && p !== '/portal/jobs/create',
+        match: (p: string) =>
+            p.startsWith("/portal/jobs") && p !== "/portal/jobs/create",
     },
     {
-        href: '/portal/jobs/create',
-        label: 'Add Job',
+        href: "/portal/jobs/create",
+        label: "Add Job",
         icon: PlusCircleIcon,
-        match: (p: string) => p === '/portal/jobs/create',
+        match: (p: string) => p === "/portal/jobs/create",
     },
     {
-        href: '/portal/applications',
-        label: 'Applications / CVs',
+        href: "/portal/applications",
+        label: "Applications / CVs",
         icon: FileTextIcon,
-        match: (p: string) => p.startsWith('/portal/applications') || p.startsWith('/portal/cvs'),
+        match: (p: string) =>
+            p.startsWith("/portal/applications") || p.startsWith("/portal/cvs"),
     },
     {
-        href: '/portal/setup/countries',
-        label: 'Countries Setup',
+        href: "/portal/setup/countries",
+        label: "Countries Setup",
         icon: GlobeIcon,
-        match: (p: string) => p.startsWith('/portal/setup/countries'),
+        match: (p: string) => p.startsWith("/portal/setup/countries"),
     },
     {
-        href: '/portal/setup/designations',
-        label: 'Designations Setup',
+        href: "/portal/setup/designations",
+        label: "Designations Setup",
         icon: LayersIcon,
-        match: (p: string) => p.startsWith('/portal/setup/designations'),
+        match: (p: string) => p.startsWith("/portal/setup/designations"),
     },
 ];
 
 export function PortalLayout({ children }: PortalLayoutProps) {
     const { url, props } = usePage<any>();
     const [mobileOpen, setMobileOpen] = useState(false);
-    const user = props.auth?.user || { name: 'Admin User', email: 'admin@jobportal.com' };
+    const user = props.auth?.user || {
+        name: "Admin User",
+        email: "admin@jobportal.com",
+    };
 
     const navContent = (
         <div className="flex h-full flex-col bg-brand-900 text-brand-100">
@@ -81,11 +86,14 @@ export function PortalLayout({ children }: PortalLayoutProps) {
                                     onClick={() => setMobileOpen(false)}
                                     className={`flex h-11 items-center gap-3 rounded-lg px-3 text-[15px] font-medium transition-colors duration-150 ease-out ${
                                         active
-                                            ? 'bg-white/10 text-white font-semibold'
-                                            : 'text-brand-200 hover:bg-white/5 hover:text-white'
+                                            ? "bg-white/10 text-white font-semibold"
+                                            : "text-brand-200 hover:bg-white/5 hover:text-white"
                                     }`}
                                 >
-                                    <Icon className="h-[18px] w-[18px]" aria-hidden />
+                                    <Icon
+                                        className="h-[18px] w-[18px]"
+                                        aria-hidden
+                                    />
                                     {item.label}
                                 </Link>
                             </li>
@@ -99,7 +107,10 @@ export function PortalLayout({ children }: PortalLayoutProps) {
                             as="button"
                             className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-[15px] font-medium text-brand-200 transition-colors duration-150 ease-out hover:bg-white/5 hover:text-white"
                         >
-                            <LogOutIcon className="h-[18px] w-[18px]" aria-hidden />
+                            <LogOutIcon
+                                className="h-[18px] w-[18px]"
+                                aria-hidden
+                            />
                             Logout
                         </Link>
                     </li>
@@ -121,8 +132,12 @@ export function PortalLayout({ children }: PortalLayoutProps) {
                         {initials(user.name)}
                     </span>
                     <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-white">{user.name}</p>
-                        <p className="truncate text-[12px] text-brand-200">{user.email}</p>
+                        <p className="truncate text-sm font-semibold text-white">
+                            {user.name}
+                        </p>
+                        <p className="truncate text-[12px] text-brand-200">
+                            {user.email}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -130,7 +145,7 @@ export function PortalLayout({ children }: PortalLayoutProps) {
     );
 
     return (
-        <div className="min-h-screen w-full bg-surface">
+        <div className="min-h-screen w-full bg-surface overflow-x-hidden">
             {/* Desktop Aside */}
             <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">
                 {navContent}
@@ -172,8 +187,8 @@ export function PortalLayout({ children }: PortalLayoutProps) {
             )}
 
             {/* Main Content Area */}
-            <main className="lg:pl-64">
-                <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <main className="lg:pl-64 min-w-0 w-full max-w-full overflow-x-hidden">
+                <div className="mx-auto w-full max-w-[1280px] min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 overflow-x-hidden">
                     {children}
                 </div>
             </main>

@@ -16,8 +16,8 @@ import {
     AwardIcon,
     LanguagesIcon,
     PrinterIcon,
-    CheckCircle2Icon,
     LockIcon,
+    XIcon,
 } from 'lucide-react';
 import { PortalLayout } from '../../../Layouts/PortalLayout';
 
@@ -34,6 +34,7 @@ interface WorkExperience {
     job_title: string;
     company: string;
     country?: string;
+    salary?: string;
     start_date?: string;
     end_date?: string;
     is_current?: boolean;
@@ -79,14 +80,21 @@ interface CvProfileData {
     languages: string[];
 }
 
-interface Props {
-    cvProfile: CvProfileData;
-    manpowerCountries: string[];
+interface CountryOption {
+    id: number;
+    name: string;
+    code?: string;
 }
 
-const LANGUAGE_OPTIONS = ['Bangla', 'English', 'Arabic', 'Hindi', 'Urdu', 'Other'];
+interface Props {
+    cvProfile: CvProfileData;
+    countries?: CountryOption[];
+    manpowerCountries?: string[];
+}
 
-export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
+const COMMON_LANGUAGES = ['Bangla', 'English', 'Arabic', 'Hindi', 'Urdu', 'French'];
+
+export default function CvEditor({ cvProfile, countries, manpowerCountries }: Props) {
     // Accordion state toggles
     const [openSections, setOpenSections] = useState({
         personal: true,
@@ -98,12 +106,34 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         languages: true,
     });
 
+    const [newLangInput, setNewLangInput] = useState('');
+
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
+    const countriesList = useMemo(() => {
+        if (countries && countries.length > 0) return countries;
+        if (manpowerCountries && manpowerCountries.length > 0) {
+            return manpowerCountries.map((c, i) => ({ id: i + 1, name: c }));
+        }
+        return [
+            { id: 1, name: 'Bangladesh' },
+            { id: 2, name: 'Saudi Arabia' },
+            { id: 3, name: 'United Arab Emirates' },
+            { id: 4, name: 'Qatar' },
+            { id: 5, name: 'Oman' },
+            { id: 6, name: 'Kuwait' },
+            { id: 7, name: 'Bahrain' },
+            { id: 8, name: 'Malaysia' },
+            { id: 9, name: 'Singapore' },
+        ];
+    }, [countries, manpowerCountries]);
+
     const { data, setData, post, processing, errors } = useForm({
         _method: 'POST',
+        user_name: cvProfile.user_name || '',
+        user_phone: cvProfile.user_phone || '',
         photo: null as File | null,
         father_name: cvProfile.father_name || '',
         mother_name: cvProfile.mother_name || '',
@@ -123,12 +153,12 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         district: cvProfile.district || '',
         country: cvProfile.country || 'Bangladesh',
         email: cvProfile.email || cvProfile.user_email || '',
-        languages: cvProfile.languages || ['Bangla', 'English'],
+        languages: cvProfile.languages && cvProfile.languages.length > 0 ? cvProfile.languages : ['Bangla', 'English'],
         qualifications: cvProfile.qualifications.length > 0 ? cvProfile.qualifications : [
             { degree: '', institution: '', passing_year: '', result_grade: '' }
         ],
         experiences: cvProfile.experiences.length > 0 ? cvProfile.experiences : [
-            { job_title: '', company: '', country: '', start_date: '', end_date: '', is_current: false }
+            { job_title: '', company: '', country: 'Bangladesh', salary: '', start_date: '', end_date: '', is_current: false }
         ],
         trainings: cvProfile.trainings.length > 0 ? cvProfile.trainings : [
             { course_name: '', institute: '', duration: '' }
@@ -157,7 +187,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         return `${mos} mos`;
     }, [data.experiences]);
 
-    // Dynamic List Handlers
+    // Dynamic List Handlers - Qualifications
     const addQualification = () => {
         setData('qualifications', [
             ...data.qualifications,
@@ -175,10 +205,11 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         setData('qualifications', updated);
     };
 
+    // Dynamic List Handlers - Experiences
     const addExperience = () => {
         setData('experiences', [
             ...data.experiences,
-            { job_title: '', company: '', country: '', start_date: '', end_date: '', is_current: false },
+            { job_title: '', company: '', country: 'Bangladesh', salary: '', start_date: '', end_date: '', is_current: false },
         ]);
     };
 
@@ -192,6 +223,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         setData('experiences', updated);
     };
 
+    // Dynamic List Handlers - Trainings
     const addTraining = () => {
         setData('trainings', [
             ...data.trainings,
@@ -209,12 +241,27 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         setData('trainings', updated);
     };
 
+    // Languages Handlers
     const toggleLanguage = (lang: string) => {
         if (data.languages.includes(lang)) {
             setData('languages', data.languages.filter((l) => l !== lang));
         } else {
             setData('languages', [...data.languages, lang]);
         }
+    };
+
+    const handleAddCustomLanguage = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const trimmed = newLangInput.trim();
+        if (!trimmed) return;
+        if (!data.languages.some((l) => l.toLowerCase() === trimmed.toLowerCase())) {
+            setData('languages', [...data.languages, trimmed]);
+        }
+        setNewLangInput('');
+    };
+
+    const handleRemoveLanguage = (lang: string) => {
+        setData('languages', data.languages.filter((l) => l !== lang));
     };
 
     const submit = (e: React.FormEvent) => {
@@ -224,7 +271,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
 
     return (
         <PortalLayout title="Manpower CV Profile Editor">
-            <Head title={`Edit CV - ${cvProfile.user_name}`} />
+            <Head title={`Edit CV - ${data.user_name || cvProfile.user_name}`} />
 
             <div className="space-y-6 max-w-5xl mx-auto pb-16">
                 {/* Top Action Bar */}
@@ -237,7 +284,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                             <ArrowLeftIcon className="h-3.5 w-3.5" /> Back to Created CVs
                         </Link>
                         <h2 className="text-2xl font-bold text-ink-900 tracking-tight">
-                            Manpower CV Profile: {cvProfile.user_name}
+                            Manpower CV Profile: {data.user_name || cvProfile.user_name}
                         </h2>
                         <p className="text-sm text-ink-500">
                             Complete the structured fields below to generate the standardized manpower PDF CV.
@@ -264,29 +311,64 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                     </div>
                 </div>
 
-                {/* Core Account Data Banner */}
-                <div className="bg-brand-50/70 rounded-2xl border border-brand-200 p-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-brand-900 uppercase tracking-wider mb-2">
-                        <LockIcon className="h-3.5 w-3.5 text-brand-700" />
-                        Auto-Filled Core User Information (Protected)
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="bg-white p-3 rounded-xl border border-brand-100">
-                            <span className="text-[11px] font-medium text-ink-500 block">Full Name</span>
-                            <span className="font-bold text-ink-900 text-sm">{cvProfile.user_name}</span>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-brand-100">
-                            <span className="text-[11px] font-medium text-ink-500 block">Passport Number</span>
-                            <span className="font-mono font-bold text-ink-900 text-sm">{cvProfile.user_passport || 'Not set'}</span>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-brand-100">
-                            <span className="text-[11px] font-medium text-ink-500 block">Mobile Number</span>
-                            <span className="font-mono font-bold text-ink-900 text-sm">{cvProfile.user_phone || 'Not set'}</span>
-                        </div>
-                    </div>
-                </div>
-
                 <form onSubmit={submit} className="space-y-4">
+                    {/* Editable Core Account Data Banner */}
+                    <div className="bg-brand-50/70 rounded-2xl border border-brand-200 p-5 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2 text-xs font-bold text-brand-900 uppercase tracking-wider">
+                                <UserIcon className="h-4 w-4 text-brand-700" />
+                                Candidate Core User Information
+                            </div>
+                            <span className="text-[11px] text-brand-800 font-medium">
+                                Updates candidate master record & CV
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-ink-800 mb-1">
+                                    Full Name <span className="text-danger-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.user_name}
+                                    onChange={(e) => setData('user_name', e.target.value)}
+                                    placeholder="e.g. Md Sumon Ali"
+                                    className="w-full text-sm rounded-lg border-line bg-white text-ink-900 font-semibold focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                                    required
+                                />
+                                {errors.user_name && <p className="text-xs text-danger-500 mt-1">{errors.user_name}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-ink-800 mb-1 flex items-center justify-between">
+                                    <span>Passport Number</span>
+                                    <span className="inline-flex items-center gap-1 text-[10px] text-ink-500 font-normal">
+                                        <LockIcon className="h-2.5 w-2.5" /> Read-only
+                                    </span>
+                                </label>
+                                <input
+                                    type="text"
+                                    disabled
+                                    value={cvProfile.user_passport || 'Not set'}
+                                    className="w-full text-sm rounded-lg border-line bg-ink-100 text-ink-600 font-mono font-bold cursor-not-allowed"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-ink-800 mb-1">
+                                    Mobile Number <span className="text-danger-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.user_phone}
+                                    onChange={(e) => setData('user_phone', e.target.value)}
+                                    placeholder="e.g. 01712345678"
+                                    className="w-full text-sm rounded-lg border-line bg-white text-ink-900 font-mono font-semibold focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                                    required
+                                />
+                                {errors.user_phone && <p className="text-xs text-danger-500 mt-1">{errors.user_phone}</p>}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* ==================== 1. PERSONAL INFORMATION ==================== */}
                     <div className="bg-white rounded-2xl border border-line shadow-card overflow-hidden">
                         <button
@@ -344,7 +426,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             type="text"
                                             value={data.father_name}
                                             onChange={(e) => setData('father_name', e.target.value)}
-                                            placeholder="e.g. Md. Shamsul Haque"
+                                            placeholder="e.g. Md Soleman Ali"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -354,7 +436,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             type="text"
                                             value={data.mother_name}
                                             onChange={(e) => setData('mother_name', e.target.value)}
-                                            placeholder="e.g. Fatema Begum"
+                                            placeholder="e.g. Mst Joygon Neca"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -373,7 +455,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             type="text"
                                             value={data.pob}
                                             onChange={(e) => setData('pob', e.target.value)}
-                                            placeholder="e.g. Cumilla"
+                                            placeholder="e.g. Pabna / Cumilla"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -424,7 +506,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             type="text"
                                             value={data.height}
                                             onChange={(e) => setData('height', e.target.value)}
-                                            placeholder="e.g. 5 ft 8 in / 173 cm"
+                                            placeholder="e.g. 5 Feet 5 Inches"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -434,7 +516,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             type="text"
                                             value={data.weight}
                                             onChange={(e) => setData('weight', e.target.value)}
-                                            placeholder="e.g. 68 kg"
+                                            placeholder="e.g. 58 KGS"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -493,7 +575,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             type="text"
                                             value={data.passport_issue_place}
                                             onChange={(e) => setData('passport_issue_place', e.target.value)}
-                                            placeholder="e.g. Dhaka"
+                                            placeholder="e.g. DHAKA"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -527,42 +609,42 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                             <div className="p-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                     <div>
-                                        <label className="block text-xs font-semibold text-ink-700 mb-1">Village / Area</label>
+                                        <label className="block text-xs font-semibold text-ink-700 mb-1">Village / Area (Vill.)</label>
                                         <input
                                             type="text"
                                             value={data.village_area}
                                             onChange={(e) => setData('village_area', e.target.value)}
-                                            placeholder="e.g. Chandina Ward 4"
+                                            placeholder="e.g. NUR JAMAL"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-ink-700 mb-1">Post Office</label>
+                                        <label className="block text-xs font-semibold text-ink-700 mb-1">Post Office (P.O.)</label>
                                         <input
                                             type="text"
                                             value={data.post_office}
                                             onChange={(e) => setData('post_office', e.target.value)}
-                                            placeholder="e.g. Chandina"
+                                            placeholder="e.g. MULADULI - 6623"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-ink-700 mb-1">Police Station / Upazila</label>
+                                        <label className="block text-xs font-semibold text-ink-700 mb-1">Police Station / Upazila (P.S.)</label>
                                         <input
                                             type="text"
                                             value={data.police_station}
                                             onChange={(e) => setData('police_station', e.target.value)}
-                                            placeholder="e.g. Chandina"
+                                            placeholder="e.g. ISHWARDI"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-ink-700 mb-1">District</label>
+                                        <label className="block text-xs font-semibold text-ink-700 mb-1">District (Dist.)</label>
                                         <input
                                             type="text"
                                             value={data.district}
                                             onChange={(e) => setData('district', e.target.value)}
-                                            placeholder="e.g. Cumilla"
+                                            placeholder="e.g. PABNA"
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         />
                                     </div>
@@ -573,8 +655,8 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                             onChange={(e) => setData('country', e.target.value)}
                                             className="w-full text-sm rounded-lg border-line bg-surface text-ink-900"
                                         >
-                                            {manpowerCountries.map((c) => (
-                                                <option key={c} value={c}>{c}</option>
+                                            {countriesList.map((c) => (
+                                                <option key={c.id || c.name} value={c.name}>{c.name}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -592,7 +674,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         )}
                     </div>
 
-                    {/* ==================== 4. ACADEMIC QUALIFICATIONS (DYNAMIC LIST) ==================== */}
+                    {/* ==================== 4. ACADEMIC QUALIFICATIONS (DYNAMIC LIST & LABELED RESULT) ==================== */}
                     <div className="bg-white rounded-2xl border border-line shadow-card overflow-hidden">
                         <button
                             type="button"
@@ -607,7 +689,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                     <h3 className="text-base font-bold text-ink-900">
                                         4. Academic Qualifications ({data.qualifications.length} Entries)
                                     </h3>
-                                    <p className="text-xs text-ink-500">Add or remove educational certificates</p>
+                                    <p className="text-xs text-ink-500">Add or edit certificates with explicit degree, institution, passing year & result labels</p>
                                 </div>
                             </div>
                             <span className="text-ink-400">
@@ -616,43 +698,63 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         </button>
 
                         {openSections.academic && (
-                            <div className="p-6 space-y-3">
+                            <div className="p-6 space-y-4">
                                 {data.qualifications.map((q, idx) => (
-                                    <div key={idx} className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-surface rounded-xl border border-line">
-                                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 flex-1 w-full">
-                                            <input
-                                                type="text"
-                                                placeholder="Degree (e.g. SSC, Diploma)"
-                                                value={q.degree}
-                                                onChange={(e) => updateQualification(idx, 'degree', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Institution / Board"
-                                                value={q.institution}
-                                                onChange={(e) => updateQualification(idx, 'institution', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Passing Year (e.g. 2018)"
-                                                value={q.passing_year}
-                                                onChange={(e) => updateQualification(idx, 'passing_year', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Result / Grade (GPA 4.5)"
-                                                value={q.result_grade || ''}
-                                                onChange={(e) => updateQualification(idx, 'result_grade', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
+                                    <div key={idx} className="flex flex-col sm:flex-row items-end gap-3 p-3.5 bg-surface rounded-xl border border-line">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 flex-1 w-full">
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Degree / Examination
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. S.S.C, H.S.C, Class VIII"
+                                                    value={q.degree}
+                                                    onChange={(e) => updateQualification(idx, 'degree', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Institution / Board
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. Rajshahi Board / Technical Board"
+                                                    value={q.institution}
+                                                    onChange={(e) => updateQualification(idx, 'institution', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Passing Year
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. 2018"
+                                                    value={q.passing_year}
+                                                    onChange={(e) => updateQualification(idx, 'passing_year', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Result / Grade
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. GPA 4.5 / Passed"
+                                                    value={q.result_grade || ''}
+                                                    onChange={(e) => updateQualification(idx, 'result_grade', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => removeQualification(idx)}
-                                            className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition"
+                                            className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition mb-0.5"
                                             title="Remove Qualification"
                                         >
                                             <Trash2Icon className="h-4 w-4" />
@@ -671,7 +773,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         )}
                     </div>
 
-                    {/* ==================== 5. WORK EXPERIENCE (DYNAMIC LIST & LIVE AUTO-TOTAL) ==================== */}
+                    {/* ==================== 5. WORK EXPERIENCE (SALARY & COUNTRY DROPDOWN) ==================== */}
                     <div className="bg-white rounded-2xl border border-line shadow-card overflow-hidden">
                         <button
                             type="button"
@@ -687,8 +789,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                         5. Work Experience ({data.experiences.length} Entries)
                                     </h3>
                                     <p className="text-xs text-ink-500">
-                                        Live computed total experience:{' '}
-                                        <span className="font-bold text-accent-700">{liveTotalExperience}</span>
+                                        Job title, company, country dropdown, editable salary & live total: <span className="font-bold text-accent-700">{liveTotalExperience}</span>
                                     </p>
                                 </div>
                             </div>
@@ -706,42 +807,57 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
 
                                 {data.experiences.map((exp, idx) => (
                                     <div key={idx} className="p-4 bg-surface rounded-xl border border-line space-y-3">
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-ink-600 mb-1">Job Title</label>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">Position / Job Title</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="e.g. Electrical Technician"
+                                                    placeholder="e.g. TRANSMISSION LINEMAN"
                                                     value={exp.job_title}
                                                     onChange={(e) => updateExperience(idx, 'job_title', e.target.value)}
                                                     className="w-full text-sm rounded-lg border-line bg-white"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-ink-600 mb-1">Company / Employer</label>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">Company Name</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="e.g. Al Rashid Contracting"
+                                                    placeholder="e.g. SOHEL ENGINEERING"
                                                     value={exp.company}
                                                     onChange={(e) => updateExperience(idx, 'company', e.target.value)}
                                                     className="w-full text-sm rounded-lg border-line bg-white"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-ink-600 mb-1">Country</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="e.g. Saudi Arabia / Bangladesh"
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">Country</label>
+                                                <select
                                                     value={exp.country || ''}
                                                     onChange={(e) => updateExperience(idx, 'country', e.target.value)}
                                                     className="w-full text-sm rounded-lg border-line bg-white"
+                                                >
+                                                    <option value="">Select Country</option>
+                                                    {countriesList.map((c) => (
+                                                        <option key={c.id || c.name} value={c.name}>
+                                                            {c.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">Salary</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. 30000 BDT / 1500 SAR"
+                                                    value={exp.salary || ''}
+                                                    onChange={(e) => updateExperience(idx, 'salary', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white font-mono"
                                                 />
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-ink-600 mb-1">Start Date</label>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">Start Date</label>
                                                 <input
                                                     type="date"
                                                     value={exp.start_date || ''}
@@ -750,7 +866,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-ink-600 mb-1">End Date</label>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">End Date</label>
                                                 <input
                                                     type="date"
                                                     disabled={exp.is_current}
@@ -793,7 +909,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         )}
                     </div>
 
-                    {/* ==================== 6. TRAINING (DYNAMIC LIST) ==================== */}
+                    {/* ==================== 6. TRAINING (DYNAMIC LIST WITH LABELS) ==================== */}
                     <div className="bg-white rounded-2xl border border-line shadow-card overflow-hidden">
                         <button
                             type="button"
@@ -806,7 +922,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                 </span>
                                 <div>
                                     <h3 className="text-base font-bold text-ink-900">6. Technical & Vocational Training</h3>
-                                    <p className="text-xs text-ink-500">Course name, institute, duration</p>
+                                    <p className="text-xs text-ink-500">Course / Trade, Training Institute, and Duration</p>
                                 </div>
                             </div>
                             <span className="text-ink-400">
@@ -815,36 +931,51 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         </button>
 
                         {openSections.training && (
-                            <div className="p-6 space-y-3">
+                            <div className="p-6 space-y-4">
                                 {data.trainings.map((t, idx) => (
-                                    <div key={idx} className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-surface rounded-xl border border-line">
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1 w-full">
-                                            <input
-                                                type="text"
-                                                placeholder="Course / Trade (e.g. Building Electrician)"
-                                                value={t.course_name}
-                                                onChange={(e) => updateTraining(idx, 'course_name', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Training Institute (e.g. BKTTC)"
-                                                value={t.institute}
-                                                onChange={(e) => updateTraining(idx, 'institute', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Duration (e.g. 6 Months / 360 Hrs)"
-                                                value={t.duration}
-                                                onChange={(e) => updateTraining(idx, 'duration', e.target.value)}
-                                                className="text-sm rounded-lg border-line bg-white"
-                                            />
+                                    <div key={idx} className="flex flex-col sm:flex-row items-end gap-3 p-3.5 bg-surface rounded-xl border border-line">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 w-full">
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Course / Trade
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. Building Electrician / Lineman"
+                                                    value={t.course_name}
+                                                    onChange={(e) => updateTraining(idx, 'course_name', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Training Institute
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. BKTTC / Technical Training Centre"
+                                                    value={t.institute}
+                                                    onChange={(e) => updateTraining(idx, 'institute', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-semibold text-ink-700 mb-1">
+                                                    Duration
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. 6 Months / 360 Hrs"
+                                                    value={t.duration}
+                                                    onChange={(e) => updateTraining(idx, 'duration', e.target.value)}
+                                                    className="w-full text-sm rounded-lg border-line bg-white"
+                                                />
+                                            </div>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => removeTraining(idx)}
-                                            className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition"
+                                            className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition mb-0.5"
                                             title="Remove Training"
                                         >
                                             <Trash2Icon className="h-4 w-4" />
@@ -863,7 +994,7 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         )}
                     </div>
 
-                    {/* ==================== 7. LANGUAGES (MULTI-SELECT COMPONENT) ==================== */}
+                    {/* ==================== 7. LANGUAGES KNOWN (CUSTOM ADDABLE JSON ARRAY) ==================== */}
                     <div className="bg-white rounded-2xl border border-line shadow-card overflow-hidden">
                         <button
                             type="button"
@@ -875,8 +1006,8 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                                     <LanguagesIcon className="h-5 w-5" />
                                 </span>
                                 <div>
-                                    <h3 className="text-base font-bold text-ink-900">7. Languages Known</h3>
-                                    <p className="text-xs text-ink-500">Select all languages the candidate speaks</p>
+                                    <h3 className="text-base font-bold text-ink-900">7. Languages Known ({data.languages.length})</h3>
+                                    <p className="text-xs text-ink-500">Add or toggle languages (stored as JSON array in candidate CV profile)</p>
                                 </div>
                             </div>
                             <span className="text-ink-400">
@@ -885,26 +1016,91 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
                         </button>
 
                         {openSections.languages && (
-                            <div className="p-6">
-                                <div className="flex flex-wrap gap-2.5">
-                                    {LANGUAGE_OPTIONS.map((lang) => {
-                                        const checked = data.languages.includes(lang);
-                                        return (
-                                            <button
-                                                key={lang}
-                                                type="button"
-                                                onClick={() => toggleLanguage(lang)}
-                                                className={`px-4 py-2 rounded-xl text-sm font-semibold transition border ${
-                                                    checked
-                                                        ? 'bg-brand-800 text-white border-brand-800 shadow-sm'
-                                                        : 'bg-surface text-ink-700 border-line hover:border-brand-300'
-                                                }`}
-                                            >
-                                                {checked ? '✓ ' : '+ '}
-                                                {lang}
-                                            </button>
-                                        );
-                                    })}
+                            <div className="p-6 space-y-5">
+                                {/* Currently Selected Languages Display */}
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-500 mb-2">
+                                        Active Languages on CV:
+                                    </label>
+                                    {data.languages.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {data.languages.map((lang) => (
+                                                <span
+                                                    key={lang}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold bg-brand-800 text-white shadow-sm"
+                                                >
+                                                    {lang}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveLanguage(lang)}
+                                                        className="hover:bg-brand-700 p-0.5 rounded-full transition"
+                                                        title={`Remove ${lang}`}
+                                                    >
+                                                        <XIcon className="h-3.5 w-3.5" />
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-ink-400 italic">No languages selected yet.</p>
+                                    )}
+                                </div>
+
+                                {/* Custom Language Input */}
+                                <div className="pt-2 border-t border-line">
+                                    <label className="block text-xs font-semibold text-ink-700 mb-1.5">
+                                        Add Custom Language
+                                    </label>
+                                    <div className="flex gap-2 max-w-md">
+                                        <input
+                                            type="text"
+                                            value={newLangInput}
+                                            onChange={(e) => setNewLangInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddCustomLanguage();
+                                                }
+                                            }}
+                                            placeholder="Type language name (e.g. Japanese, German)"
+                                            className="flex-1 text-sm rounded-lg border-line bg-surface text-ink-900"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddCustomLanguage()}
+                                            disabled={!newLangInput.trim()}
+                                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-brand-800 text-white hover:bg-brand-700 disabled:opacity-40 transition"
+                                        >
+                                            <PlusIcon className="h-3.5 w-3.5" /> Add
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Quick Suggestions */}
+                                <div>
+                                    <label className="block text-[11px] font-semibold text-ink-500 mb-2">
+                                        Quick Presets:
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {COMMON_LANGUAGES.map((lang) => {
+                                            const active = data.languages.includes(lang);
+                                            return (
+                                                <button
+                                                    key={lang}
+                                                    type="button"
+                                                    onClick={() => toggleLanguage(lang)}
+                                                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition border ${
+                                                        active
+                                                            ? 'bg-brand-100 text-brand-900 border-brand-300'
+                                                            : 'bg-surface text-ink-600 border-line hover:border-brand-300'
+                                                    }`}
+                                                >
+                                                    {active ? '✓ ' : '+ '}
+                                                    {lang}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -932,4 +1128,3 @@ export default function CvEditor({ cvProfile, manpowerCountries }: Props) {
         </PortalLayout>
     );
 }
-

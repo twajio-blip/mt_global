@@ -23,9 +23,19 @@ class PortalSystemTest extends TestCase
         $this->seed();
     }
 
+    public function test_unauthenticated_user_cannot_access_portal_and_is_redirected_to_login(): void
+    {
+        $this->get('/portal/dashboard')->assertRedirect('/login');
+        $this->get('/portal/applications')->assertRedirect('/login');
+        $this->get('/portal/jobs')->assertRedirect('/login');
+        $this->get('/jobs')->assertRedirect('/login');
+        $this->get('/')->assertRedirect('/login');
+    }
+
     public function test_dashboard_page_renders_with_stats_and_recent_data(): void
     {
-        $response = $this->get('/portal/dashboard');
+        $admin = User::first();
+        $response = $this->actingAs($admin)->get('/portal/dashboard');
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => 
             $page->component('Portal/Dashboard')
@@ -37,13 +47,15 @@ class PortalSystemTest extends TestCase
 
     public function test_public_jobs_page_renders_successfully(): void
     {
-        $response = $this->get('/jobs');
+        $admin = User::first();
+        $response = $this->actingAs($admin)->get('/jobs');
         $response->assertStatus(200);
     }
 
     public function test_portal_applications_table_renders_successfully(): void
     {
-        $response = $this->get('/portal/applications');
+        $admin = User::first();
+        $response = $this->actingAs($admin)->get('/portal/applications');
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => 
             $page->component('Portal/Applications/Index')
@@ -55,10 +67,11 @@ class PortalSystemTest extends TestCase
 
     public function test_job_creation_page_and_sequential_prefix_code(): void
     {
+        $admin = User::first();
         $country = Country::first();
         $designation = Designation::first();
 
-        $response = $this->post('/portal/jobs', [
+        $response = $this->actingAs($admin)->post('/portal/jobs', [
             'title_en' => 'Senior Site Inspector',
             'prefix' => 'QA-INSP',
             'country_id' => $country->id,
@@ -81,10 +94,11 @@ class PortalSystemTest extends TestCase
 
     public function test_cv_profile_editor_loads_with_auto_filled_core_user(): void
     {
+        $admin = User::first();
         $cv = CvProfile::first();
         $this->assertNotNull($cv);
 
-        $response = $this->get("/portal/cvs/{$cv->id}/edit");
+        $response = $this->actingAs($admin)->get("/portal/cvs/{$cv->id}/edit");
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
             $page->component('Portal/Applications/CvEditor')
@@ -98,19 +112,20 @@ class PortalSystemTest extends TestCase
     {
         Storage::fake('public');
 
+        $admin = User::first();
         $job = Job::first();
 
         $cvFile = UploadedFile::fake()->create('candidate_cv.pdf', 200, 'application/pdf');
         $passportFile = UploadedFile::fake()->create('passport_scan.jpg', 300, 'image/jpeg');
         $photoFile = UploadedFile::fake()->create('photo.jpg', 150, 'image/jpeg');
 
-        $response = $this->post("/jobs/{$job->id}/apply", [
+        $response = $this->actingAs($admin)->post("/jobs/{$job->id}/apply", [
             'full_name' => 'Tariqul Islam',
             'passport_number' => 'B09988776',
             'mobile_number' => '+880 1711-223344',
             'experience_years' => '6 years',
             'has_overseas_experience' => true,
-            'current_location' => 'Sylhet, Bangladesh',
+            'current_location' => $job->country_id,
             'cv_file' => $cvFile,
             'passport_file' => $passportFile,
             'photo_file' => $photoFile,
@@ -125,5 +140,53 @@ class PortalSystemTest extends TestCase
         $this->assertNotNull($app->cv_file_path);
         $this->assertNotNull($app->passport_file_path);
         $this->assertNotNull($app->photo_file_path);
+    }
+
+    public function test_public_job_controller_returns_json_when_requested_as_api(): void
+    {
+        $job = Job::where('status', 'Published')->first();
+
+        // Jobs listing as JSON
+        $listResponse = $this->getJson('/api/v1/jobs');
+        $listResponse->assertStatus(200)
+            ->assertJson(['success' => true])
+            ->assertJsonStructure(['success', 'data', 'pagination', 'countries', 'designations']);
+
+        // Job details as JSON (supports both ID and job code)
+        $showResponse = $this->getJson("/api/v1/jobs/{$job->job_code}");
+        $showResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'id' => $job->id,
+                    'job_code' => $job->job_code,
+                ],
+            ]);
+    }
+
+    public function test_public_job_apply_returns_json_when_submitted_as_api(): void
+    {
+        Storage::fake('public');
+
+        $job = Job::first();
+
+        $response = $this->postJson("/api/v1/jobs/{$job->id}/apply", [
+            'full_name' => 'API Applicant',
+            'passport_number' => 'B77665544',
+            'mobile_number' => '01712345678',
+            'experience_years' => '4 years',
+            'has_overseas_experience' => 'true',
+            'current_location' => $job->country_id,
+            'cv_file' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'candidate_name' => 'API Applicant',
+                    'job_id' => $job->id,
+                ],
+            ]);
     }
 }

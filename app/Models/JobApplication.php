@@ -41,5 +41,10 @@ class JobApplication extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function locationCountry(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'current_location');
+    }
 }
 

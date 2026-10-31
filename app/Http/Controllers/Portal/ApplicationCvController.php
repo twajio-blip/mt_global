@@ -27,7 +27,7 @@ class ApplicationCvController extends Controller
         $tab = $request->input('tab', 'applications'); // 'applications' or 'cvs'
 
         // Data for View A: Job Applications
-        $appQuery = JobApplication::with(['job.country', 'job.designation', 'user'])
+        $appQuery = JobApplication::with(['job.country', 'job.designation', 'user', 'locationCountry'])
             ->orderBy('created_at', 'desc');
 
         if ($jobId = $request->input('job_id')) {
@@ -56,6 +56,15 @@ class ApplicationCvController extends Controller
         }
 
         $applications = $appQuery->paginate(15, ['*'], 'app_page')->withQueryString()->through(function ($app) {
+            $locCountry = $app->locationCountry;
+            if (!$locCountry) {
+                if (is_numeric($app->current_location)) {
+                    $locCountry = Country::find($app->current_location);
+                } else {
+                    $locCountry = Country::where('code', $app->current_location)->orWhere('name', $app->current_location)->first();
+                }
+            }
+
             return [
                 'id' => $app->id,
                 'job_id' => $app->job_id,
@@ -70,6 +79,9 @@ class ApplicationCvController extends Controller
                 'experience_years' => $app->experience_years,
                 'has_overseas_experience' => (bool) $app->has_overseas_experience,
                 'current_location' => $app->current_location,
+                'current_location_id' => $locCountry?->id ?? (int) $app->current_location,
+                'current_location_name' => $locCountry?->name ?? 'Bangladesh',
+                'current_location_code' => $locCountry?->code ?? 'BD',
                 'cv_file_path' => $app->cv_file_path,
                 'cv_file_name' => $app->cv_file_name ?? 'CV_Document.pdf',
                 'passport_file_path' => $app->passport_file_path,
@@ -151,12 +163,12 @@ class ApplicationCvController extends Controller
     }
 
     /**
-     * Update application status (Pending, Selected, Rejected)
+     * Update application status (Pending, Approved, etc.)
      */
     public function updateApplicationStatus(Request $request, JobApplication $application): RedirectResponse
     {
         $request->validate([
-            'status' => 'required|in:Pending,Selected,Rejected',
+            'status' => 'required|in:Pending,Approved,Selected,Rejected',
         ]);
 
         $application->update(['status' => $request->input('status')]);
@@ -171,29 +183,12 @@ class ApplicationCvController extends Controller
     {
         $cvProfile->load(['user', 'qualifications', 'experiences', 'trainings']);
 
-        $manpowerCountries = [
-            'Bangladesh',
-            'Saudi Arabia',
-            'UAE',
-            'Qatar',
-            'Kuwait',
-            'Oman',
-            'Bahrain',
-            'Malaysia',
-            'Singapore',
-            'Romania',
-            'Croatia',
-            'Poland',
-            'Jordan',
-            'Maldives',
-            'India',
-        ];
+        $countries = Country::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
 
         return Inertia::render('Portal/Applications/CvEditor', [
             'cvProfile' => [
                 'id' => $cvProfile->id,
                 'user_id' => $cvProfile->user_id,
-                // Auto-filled/grayed out core user fields
                 'user_name' => $cvProfile->user?->name ?? '',
                 'user_passport' => $cvProfile->user?->passport_number ?? '',
                 'user_phone' => $cvProfile->user?->phone ?? '',
@@ -221,13 +216,39 @@ class ApplicationCvController extends Controller
                 'country' => $cvProfile->country ?? 'Bangladesh',
                 'email' => $cvProfile->email ?? $cvProfile->user?->email ?? '',
                 // Dynamic lists
-                'qualifications' => $cvProfile->qualifications,
-                'experiences' => $cvProfile->experiences,
-                'trainings' => $cvProfile->trainings,
+                'qualifications' => $cvProfile->qualifications->map(function ($q) {
+                    return [
+                        'id' => $q->id,
+                        'degree' => $q->degree,
+                        'institution' => $q->institution,
+                        'passing_year' => $q->passing_year,
+                        'result_grade' => $q->result_grade ?? '',
+                    ];
+                }),
+                'experiences' => $cvProfile->experiences->map(function ($exp) {
+                    return [
+                        'id' => $exp->id,
+                        'job_title' => $exp->job_title,
+                        'company' => $exp->company,
+                        'country' => $exp->country ?? 'Bangladesh',
+                        'salary' => $exp->salary ?? '',
+                        'start_date' => $exp->start_date?->format('Y-m-d') ?? '',
+                        'end_date' => $exp->end_date?->format('Y-m-d') ?? '',
+                        'is_current' => (bool) $exp->is_current,
+                    ];
+                }),
+                'trainings' => $cvProfile->trainings->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'course_name' => $t->course_name,
+                        'institute' => $t->institute,
+                        'duration' => $t->duration ?? '',
+                    ];
+                }),
                 'total_experience' => $cvProfile->total_experience_formatted,
                 'languages' => $cvProfile->languages ?? [],
             ],
-            'manpowerCountries' => $manpowerCountries,
+            'countries' => $countries,
         ]);
     }
 
@@ -237,6 +258,8 @@ class ApplicationCvController extends Controller
     public function updateCv(Request $request, CvProfile $cvProfile): RedirectResponse
     {
         $validated = $request->validate([
+            'user_name' => 'required|string|max:255',
+            'user_phone' => 'required|string|max:50',
             'father_name' => 'nullable|string|max:255',
             'mother_name' => 'nullable|string|max:255',
             'dob' => 'nullable|date',
@@ -260,6 +283,14 @@ class ApplicationCvController extends Controller
             'experiences' => 'nullable|array',
             'trainings' => 'nullable|array',
         ]);
+
+        // Update core user full name and phone
+        if ($cvProfile->user) {
+            $cvProfile->user->update([
+                'name' => $validated['user_name'],
+                'phone' => $validated['user_phone'],
+            ]);
+        }
 
         // Handle photo upload if present
         if ($request->hasFile('photo')) {
@@ -315,6 +346,7 @@ class ApplicationCvController extends Controller
                         'job_title' => $exp['job_title'],
                         'company' => $exp['company'],
                         'country' => $exp['country'] ?? null,
+                        'salary' => $exp['salary'] ?? null,
                         'start_date' => $exp['start_date'] ?? null,
                         'end_date' => $exp['end_date'] ?? null,
                         'is_current' => !empty($exp['is_current']),
@@ -343,7 +375,7 @@ class ApplicationCvController extends Controller
     }
 
     /**
-     * Preview / Export Standard Manpower CV (Clean Printable Template)
+     * Preview / Export Standard Manpower CV (Clean Printable Template matching agency standard)
      */
     public function exportCv(CvProfile $cvProfile): Response
     {
@@ -360,24 +392,59 @@ class ApplicationCvController extends Controller
                 'mother_name' => $cvProfile->mother_name,
                 'dob' => $cvProfile->dob?->format('d M Y'),
                 'pob' => $cvProfile->pob,
-                'nationality' => $cvProfile->nationality,
-                'gender' => $cvProfile->gender,
-                'marital_status' => $cvProfile->marital_status,
-                'religion' => $cvProfile->religion,
+                'nationality' => $cvProfile->nationality ?? 'BANGLADESHI',
+                'gender' => $cvProfile->gender ?? 'MALE',
+                'marital_status' => $cvProfile->marital_status ?? 'Married',
+                'religion' => $cvProfile->religion ?? 'ISLAM',
                 'height' => $cvProfile->height,
                 'weight' => $cvProfile->weight,
                 'passport_expiry' => $cvProfile->passport_expiry?->format('d M Y'),
-                'passport_issue_place' => $cvProfile->passport_issue_place,
+                'passport_issue_place' => $cvProfile->passport_issue_place ?? 'DHAKA',
                 'village_area' => $cvProfile->village_area,
                 'post_office' => $cvProfile->post_office,
                 'police_station' => $cvProfile->police_station,
                 'district' => $cvProfile->district,
-                'country' => $cvProfile->country,
+                'country' => $cvProfile->country ?? 'Bangladesh',
                 'languages' => $cvProfile->languages ?? [],
                 'total_experience' => $cvProfile->total_experience_formatted,
-                'qualifications' => $cvProfile->qualifications,
-                'experiences' => $cvProfile->experiences,
-                'trainings' => $cvProfile->trainings,
+                'position_applied' => $cvProfile->experiences->first()?->job_title ?? 'SKILLED WORKER',
+                'qualifications' => $cvProfile->qualifications->map(function ($q) {
+                    return [
+                        'id' => $q->id,
+                        'degree' => $q->degree,
+                        'institution' => $q->institution,
+                        'passing_year' => $q->passing_year,
+                        'result_grade' => $q->result_grade ?? 'Passed',
+                    ];
+                }),
+                'experiences' => $cvProfile->experiences->map(function ($exp) {
+                    $fromYear = $exp->start_date ? \Carbon\Carbon::parse($exp->start_date)->format('Y') : '';
+                    $toYear = $exp->is_current ? 'Present' : ($exp->end_date ? \Carbon\Carbon::parse($exp->end_date)->format('Y') : '');
+                    $yearsDiff = '';
+                    if ($exp->start_date) {
+                        $start = \Carbon\Carbon::parse($exp->start_date);
+                        $end = $exp->is_current ? \Carbon\Carbon::now() : ($exp->end_date ? \Carbon\Carbon::parse($exp->end_date) : $start);
+                        $yearsDiff = max(1, (int) round($start->diffInMonths($end) / 12));
+                    }
+                    return [
+                        'id' => $exp->id,
+                        'job_title' => $exp->job_title,
+                        'company' => $exp->company,
+                        'country' => strtoupper($exp->country ?? 'BANGLADESH'),
+                        'from_year' => $fromYear,
+                        'to_year' => $toYear,
+                        'years' => $yearsDiff,
+                        'salary' => $exp->salary ?: '-',
+                    ];
+                }),
+                'trainings' => $cvProfile->trainings->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'course_name' => $t->course_name,
+                        'institute' => $t->institute,
+                        'duration' => $t->duration,
+                    ];
+                }),
             ],
         ]);
     }

@@ -169,8 +169,9 @@ export default function JobsIndex({ jobs, countries, designations, filters }: Pr
                         <p className="mt-1 text-sm text-ink-600">Try a different status or search term.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-sm">
-                        <table className="w-full min-w-[980px] text-left text-sm">
+                    <div className="w-full max-w-full rounded-2xl border border-line bg-white shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full min-w-[980px] text-left text-sm">
                             <thead className="border-b border-line bg-surface text-[13px] text-ink-500">
                                 <tr>
                                     <th scope="col" className="px-4 py-3 font-medium">Job Title</th>
@@ -275,9 +276,10 @@ export default function JobsIndex({ jobs, countries, designations, filters }: Pr
                                 ))}
                             </tbody>
                         </table>
+                    </div>
 
-                        {/* Pagination */}
-                        <Pagination
+                    {/* Pagination */}
+                    <Pagination
                             links={jobs.links}
                             from={jobs.from}
                             to={jobs.to}

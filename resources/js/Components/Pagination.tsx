@@ -31,7 +31,7 @@ export function Pagination({ links, from, to, total, className = '' }: Paginatio
                 ) : null}
             </div>
 
-            <nav aria-label="Pagination" className="flex items-center gap-1">
+            <nav aria-label="Pagination" className="flex flex-wrap items-center gap-1">
                 {links.map((link, index) => {
                     const isPrev = link.label.includes('Previous') || link.label.includes('&laquo;');
                     const isNext = link.label.includes('Next') || link.label.includes('&raquo;');

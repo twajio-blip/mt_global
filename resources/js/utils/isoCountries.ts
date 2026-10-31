@@ -67,6 +67,16 @@ export function findIsoByCountryName(name: string): IsoCountry | undefined {
     );
 }
 
+export function getCountryNameByCode(codeOrName: string | null | undefined): string {
+    if (!codeOrName) return '';
+    const clean = codeOrName.trim().toUpperCase();
+    if (clean === 'BANGLADESH' || clean === 'BD') return 'Bangladesh';
+    const found = ISO_COUNTRIES.find((c) => c.code.toUpperCase() === clean);
+    if (found) return found.name;
+    const foundByName = ISO_COUNTRIES.find((c) => c.name.toUpperCase() === clean);
+    return foundByName ? foundByName.name : codeOrName;
+}
+
 export function getFlagUrl(codeOrName: string | null | undefined): string {
     if (!codeOrName) return 'https://flagcdn.com/w80/un.png';
     const clean = codeOrName.trim().toLowerCase();

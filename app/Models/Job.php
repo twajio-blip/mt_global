@@ -97,5 +97,12 @@ class Job extends Model
     {
         return $this->hasMany(JobApplication::class, 'job_id');
     }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return is_numeric($value)
+            ? ($this->where('id', $value)->first() ?? $this->where('job_code', $value)->firstOrFail())
+            : $this->where('job_code', $value)->firstOrFail();
+    }
 }
 

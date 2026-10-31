@@ -62,6 +62,8 @@ interface JobDetail {
 interface Props {
     job: JobDetail;
     relatedJobs: JobDetail[];
+    countries?: Array<{ id: number; name: string; code?: string; flag_emoji?: string }>;
+    bangladeshCountry?: { id: number; name: string; code: string } | null;
     prefilledUser?: {
         name: string;
         phone: string;
@@ -70,17 +72,24 @@ interface Props {
     } | null;
 }
 
-export default function JobDetails({ job, relatedJobs, prefilledUser }: Props) {
+export default function JobDetails({ job, relatedJobs, countries = [], bangladeshCountry, prefilledUser }: Props) {
     const { flash } = usePage<any>().props;
     const successApplication = flash?.success_application;
+
+    const bdId = bangladeshCountry?.id || 15;
+    const [isAbroad, setIsAbroad] = useState<boolean>(false);
+
+    const abroadCountryList = countries && countries.length > 0
+        ? countries.filter((c) => c.id !== bdId && (c.code || '').toUpperCase() !== 'BD' && c.name !== 'Bangladesh')
+        : [];
 
     const { data, setData, post, processing, errors, reset } = useForm({
         full_name: prefilledUser?.name || '',
         passport_number: prefilledUser?.passport_number || '',
         mobile_number: prefilledUser?.phone || '',
-        experience_years: '5 years',
+        experience_years: '5',
         has_overseas_experience: true,
-        current_location: 'Dhaka, Bangladesh',
+        current_location: String(bdId),
         cv_file: null as File | null,
         passport_file: null as File | null,
         photo_file: null as File | null,
@@ -378,15 +387,21 @@ export default function JobDetails({ job, relatedJobs, prefilledUser }: Props) {
                                             <label className="block text-xs font-semibold text-ink-700 mb-1">
                                                 Work Experience <span className="text-danger-600">*</span>
                                             </label>
-                                            <input
-                                                type="text"
-                                                required
-                                                placeholder="e.g. 5 years"
-                                                value={data.experience_years}
-                                                onChange={(e) => setData('experience_years', e.target.value)}
-                                                className="w-full text-xs rounded-lg border-line bg-surface"
-                                            />
-                                            <p className="text-[10px] text-ink-400 mt-0.5">Total years of experience in this work</p>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    min={0}
+                                                    max={50}
+                                                    required
+                                                    placeholder="5"
+                                                    value={data.experience_years.replace(/[^0-9]/g, '') || ''}
+                                                    onChange={(e) => setData('experience_years', e.target.value ? `${e.target.value} years` : '')}
+                                                    className="w-24 text-xs font-semibold rounded-lg border-line bg-surface"
+                                                />
+                                                <span className="text-xs font-medium text-ink-600">years</span>
+                                            </div>
+                                            <p className="text-[10px] text-ink-400 mt-0.5">Total years of experience in this type of work</p>
+                                            {errors.experience_years && <p className="text-xs text-danger-600">{errors.experience_years}</p>}
                                         </div>
 
                                         {/* Overseas Experience Toggle */}
@@ -400,24 +415,25 @@ export default function JobDetails({ job, relatedJobs, prefilledUser }: Props) {
                                                     onClick={() => setData('has_overseas_experience', true)}
                                                     className={`py-2 rounded-lg text-xs font-semibold border transition ${
                                                         data.has_overseas_experience
-                                                            ? 'bg-accent-600 text-white border-accent-600'
-                                                            : 'bg-surface text-ink-600 border-line'
+                                                            ? 'bg-brand-800 text-white border-brand-800'
+                                                            : 'bg-surface text-ink-600 border-line hover:border-ink-300'
                                                     }`}
                                                 >
-                                                    Yes (Gulf / Abroad)
+                                                    Yes
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => setData('has_overseas_experience', false)}
                                                     className={`py-2 rounded-lg text-xs font-semibold border transition ${
                                                         !data.has_overseas_experience
-                                                            ? 'bg-ink-800 text-white border-ink-800'
-                                                            : 'bg-surface text-ink-600 border-line'
+                                                            ? 'bg-brand-800 text-white border-brand-800'
+                                                            : 'bg-surface text-ink-600 border-line hover:border-ink-300'
                                                     }`}
                                                 >
-                                                    No Overseas
+                                                    No
                                                 </button>
                                             </div>
+                                            {errors.has_overseas_experience && <p className="text-xs text-danger-600">{errors.has_overseas_experience}</p>}
                                         </div>
 
                                         {/* Current Location */}
@@ -425,61 +441,112 @@ export default function JobDetails({ job, relatedJobs, prefilledUser }: Props) {
                                             <label className="block text-xs font-semibold text-ink-700 mb-1">
                                                 Where are you currently located? <span className="text-danger-600">*</span>
                                             </label>
-                                            <input
-                                                type="text"
-                                                required
-                                                placeholder="e.g. Cumilla, Bangladesh or Riyadh, KSA"
-                                                value={data.current_location}
-                                                onChange={(e) => setData('current_location', e.target.value)}
-                                                className="w-full text-xs rounded-lg border-line bg-surface"
-                                            />
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setIsAbroad(false);
+                                                        setData('current_location', String(bdId));
+                                                    }}
+                                                    className={`py-2 rounded-lg text-xs font-semibold border transition ${
+                                                        !isAbroad
+                                                            ? 'bg-brand-800 text-white border-brand-800 shadow-sm'
+                                                            : 'bg-surface text-ink-600 border-line hover:border-ink-300'
+                                                    }`}
+                                                >
+                                                    Bangladesh
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setIsAbroad(true);
+                                                        if (data.current_location === String(bdId) || !data.current_location) {
+                                                            const firstAbroadId = abroadCountryList[0]?.id;
+                                                            setData('current_location', firstAbroadId ? String(firstAbroadId) : '');
+                                                        }
+                                                    }}
+                                                    className={`py-2 rounded-lg text-xs font-semibold border transition ${
+                                                        isAbroad
+                                                            ? 'bg-brand-800 text-white border-brand-800 shadow-sm'
+                                                            : 'bg-surface text-ink-600 border-line hover:border-ink-300'
+                                                    }`}
+                                                >
+                                                    Abroad
+                                                </button>
+                                            </div>
+
+                                            {/* If Abroad, country dropdown appears */}
+                                            {isAbroad && (
+                                                <div className="mt-2.5">
+                                                    <label htmlFor="abroad-country-select" className="block text-[11px] font-medium text-ink-600 mb-1">
+                                                        Select Country in Abroad: <span className="text-danger-600">*</span>
+                                                    </label>
+                                                    <select
+                                                        id="abroad-country-select"
+                                                        value={data.current_location === String(bdId) ? (abroadCountryList[0]?.id ? String(abroadCountryList[0].id) : '') : data.current_location}
+                                                        onChange={(e) => setData('current_location', e.target.value)}
+                                                        className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs font-semibold text-ink-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 shadow-sm"
+                                                    >
+                                                        {abroadCountryList.map((c) => (
+                                                            <option key={c.id} value={String(c.id)}>
+                                                                {c.name} {c.code ? `(${c.code})` : ''}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
+
+                                            {errors.current_location && <p className="text-xs text-danger-600 mt-1">{errors.current_location}</p>}
                                         </div>
 
-                                        {/* 3 Required Uploaded Documents */}
+                                        {/* Uploaded Documents (Max 3 files, 5MB each) */}
                                         <div className="pt-2 border-t border-line space-y-3">
-                                            <span className="text-xs font-bold text-brand-900 uppercase tracking-wider block">
-                                                3 Required Uploaded Documents
-                                            </span>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold text-brand-900 uppercase tracking-wider block">
+                                                    Uploaded Documents
+                                                </span>
+                                                <span className="text-[11px] font-semibold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full ring-1 ring-brand-100">
+                                                    Max 3 Files · 5MB each
+                                                </span>
+                                            </div>
 
                                             {/* File 1: CV File */}
                                             <div>
                                                 <label className="block text-xs font-medium text-ink-700 mb-0.5">
-                                                    1. Candidate CV File (PDF / DOC) *
+                                                    1. CV / Resume (PDF / DOC / Image) <span className="text-danger-600">*</span>
                                                 </label>
                                                 <input
                                                     type="file"
                                                     required
-                                                    accept=".pdf,.doc,.docx"
+                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                                     onChange={(e) => setData('cv_file', e.target.files?.[0] || null)}
                                                     className="w-full text-xs text-ink-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-brand-50 file:text-brand-800"
                                                 />
                                                 {errors.cv_file && <p className="text-xs text-danger-600">{errors.cv_file}</p>}
                                             </div>
 
-                                            {/* File 2: Passport Copy */}
+                                            {/* File 2: Additional Document 1 */}
                                             <div>
                                                 <label className="block text-xs font-medium text-ink-700 mb-0.5">
-                                                    2. Passport Copy Scan (PDF / JPG / PNG) *
+                                                    2. Additional Document (Optional) <span className="text-ink-400 text-[11px] font-normal">(PDF / Image / DOC · max 5MB)</span>
                                                 </label>
                                                 <input
                                                     type="file"
-                                                    required
-                                                    accept=".pdf,.jpg,.jpeg,.png"
+                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                                     onChange={(e) => setData('passport_file', e.target.files?.[0] || null)}
                                                     className="w-full text-xs text-ink-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-brand-50 file:text-brand-800"
                                                 />
                                                 {errors.passport_file && <p className="text-xs text-danger-600">{errors.passport_file}</p>}
                                             </div>
 
-                                            {/* File 3: Photo */}
+                                            {/* File 3: Additional Document 2 */}
                                             <div>
                                                 <label className="block text-xs font-medium text-ink-700 mb-0.5">
-                                                    3. Passport-Size Photo (JPG / PNG) *
+                                                    3. Additional Document (Optional) <span className="text-ink-400 text-[11px] font-normal">(PDF / Image / DOC · max 5MB)</span>
                                                 </label>
                                                 <input
                                                     type="file"
-                                                    required
-                                                    accept=".jpg,.jpeg,.png"
+                                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                                     onChange={(e) => setData('photo_file', e.target.files?.[0] || null)}
                                                     className="w-full text-xs text-ink-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-brand-50 file:text-brand-800"
                                                 />

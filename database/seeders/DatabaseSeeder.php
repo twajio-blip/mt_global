@@ -438,24 +438,25 @@ class DatabaseSeeder extends Seeder
 
         // 6. Seed Applications (The 13 Quick Applications with 3 files)
         $sampleApplications = [
-            ['user_idx' => 0, 'job_idx' => 0, 'exp' => '5 yrs', 'overseas' => false, 'loc' => 'Cumilla, Bangladesh', 'status' => 'Selected'],
-            ['user_idx' => 1, 'job_idx' => 1, 'exp' => '4 yrs', 'overseas' => true, 'loc' => 'Pokhara, Nepal', 'status' => 'Pending'],
-            ['user_idx' => 2, 'job_idx' => 0, 'exp' => '6 yrs', 'overseas' => true, 'loc' => 'Riyadh, Saudi Arabia', 'status' => 'Selected'],
-            ['user_idx' => 3, 'job_idx' => 3, 'exp' => '2 yrs', 'overseas' => true, 'loc' => 'Cebu, Philippines', 'status' => 'Pending'],
-            ['user_idx' => 4, 'job_idx' => 2, 'exp' => '3 yrs', 'overseas' => false, 'loc' => 'Noakhali, Bangladesh', 'status' => 'Pending'],
-            ['user_idx' => 5, 'job_idx' => 4, 'exp' => '8 yrs', 'overseas' => true, 'loc' => 'Kochi, India', 'status' => 'Selected'],
-            ['user_idx' => 6, 'job_idx' => 6, 'exp' => '2 yrs', 'overseas' => false, 'loc' => 'Gazipur, Bangladesh', 'status' => 'Pending'],
-            ['user_idx' => 7, 'job_idx' => 1, 'exp' => '7 yrs', 'overseas' => true, 'loc' => 'Lahore, Pakistan', 'status' => 'Pending'],
-            ['user_idx' => 8, 'job_idx' => 7, 'exp' => '4 yrs', 'overseas' => false, 'loc' => 'Chattogram, Bangladesh', 'status' => 'Pending'],
-            ['user_idx' => 9, 'job_idx' => 5, 'exp' => '3 yrs', 'overseas' => false, 'loc' => 'Kumasi, Ghana', 'status' => 'Pending'],
-            ['user_idx' => 10, 'job_idx' => 2, 'exp' => '2 yrs', 'overseas' => false, 'loc' => 'Dharan, Nepal', 'status' => 'Rejected'],
-            ['user_idx' => 11, 'job_idx' => 8, 'exp' => '9 yrs', 'overseas' => true, 'loc' => 'Dubai, UAE', 'status' => 'Selected'],
-            ['user_idx' => 12, 'job_idx' => 9, 'exp' => '4 yrs', 'overseas' => false, 'loc' => 'Amritsar, India', 'status' => 'Pending'],
+            ['user_idx' => 0, 'job_idx' => 0, 'exp' => '5 yrs', 'overseas' => false, 'country' => 'Bangladesh', 'status' => 'Approved'],
+            ['user_idx' => 1, 'job_idx' => 1, 'exp' => '4 yrs', 'overseas' => true, 'country' => 'Saudi Arabia', 'status' => 'Pending'],
+            ['user_idx' => 2, 'job_idx' => 0, 'exp' => '6 yrs', 'overseas' => true, 'country' => 'Saudi Arabia', 'status' => 'Approved'],
+            ['user_idx' => 3, 'job_idx' => 3, 'exp' => '2 yrs', 'overseas' => true, 'country' => 'Qatar', 'status' => 'Pending'],
+            ['user_idx' => 4, 'job_idx' => 2, 'exp' => '3 yrs', 'overseas' => false, 'country' => 'Bangladesh', 'status' => 'Pending'],
+            ['user_idx' => 5, 'job_idx' => 4, 'exp' => '8 yrs', 'overseas' => true, 'country' => 'India', 'status' => 'Approved'],
+            ['user_idx' => 6, 'job_idx' => 6, 'exp' => '2 yrs', 'overseas' => false, 'country' => 'Bangladesh', 'status' => 'Pending'],
+            ['user_idx' => 7, 'job_idx' => 1, 'exp' => '7 yrs', 'overseas' => true, 'country' => 'Oman', 'status' => 'Pending'],
+            ['user_idx' => 8, 'job_idx' => 7, 'exp' => '4 yrs', 'overseas' => false, 'country' => 'Bangladesh', 'status' => 'Pending'],
+            ['user_idx' => 9, 'job_idx' => 5, 'exp' => '3 yrs', 'overseas' => false, 'country' => 'Kuwait', 'status' => 'Pending'],
+            ['user_idx' => 10, 'job_idx' => 2, 'exp' => '2 yrs', 'overseas' => false, 'country' => 'Qatar', 'status' => 'Pending'],
+            ['user_idx' => 11, 'job_idx' => 8, 'exp' => '9 yrs', 'overseas' => true, 'country' => 'UAE', 'status' => 'Approved'],
+            ['user_idx' => 12, 'job_idx' => 9, 'exp' => '4 yrs', 'overseas' => false, 'country' => 'Malaysia', 'status' => 'Pending'],
         ];
 
         foreach ($sampleApplications as $app) {
             $u = $users[$app['user_idx']];
             $j = $createdJobs[$app['job_idx']];
+            $locCountryId = $countryMap[$app['country']] ?? $countryMap['Bangladesh'];
 
             JobApplication::create([
                 'job_id' => $j->id,
@@ -465,7 +466,7 @@ class DatabaseSeeder extends Seeder
                 'mobile_number' => $u->phone,
                 'experience_years' => $app['exp'],
                 'has_overseas_experience' => $app['overseas'],
-                'current_location' => $app['loc'],
+                'current_location' => (string) $locCountryId,
                 'cv_file_path' => '/storage/samples/' . str_replace(' ', '_', $u->name) . '_CV.pdf',
                 'cv_file_name' => $u->name . ' - Professional CV.pdf',
                 'passport_file_path' => '/storage/samples/' . str_replace(' ', '_', $u->name) . '_Passport.pdf',

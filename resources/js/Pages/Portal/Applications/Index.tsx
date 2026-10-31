@@ -12,6 +12,7 @@ import {
     ExternalLinkIcon,
     InboxIcon,
     DownloadIcon,
+    FileTextIcon,
 } from 'lucide-react';
 import { PortalLayout } from '../../../Layouts/PortalLayout';
 import { PageHeader } from '../../../Components/PageHeader';
@@ -21,6 +22,7 @@ import { StatusBadge } from '../../../Components/StatusBadge';
 import { ApplicantDrawer } from '../../../Components/ApplicantDrawer';
 import { Pagination, PaginationLink } from '../../../Components/Pagination';
 import { formatDate } from '../../../utils/format';
+import { getCountryNameByCode } from '../../../utils/isoCountries';
 import { iconButton, inputClass, buttonSmPrimary, buttonSmSecondary } from '../../../utils/styles';
 
 interface SelectOption {
@@ -42,6 +44,9 @@ interface ApplicationItem {
     experience_years: string;
     has_overseas_experience: boolean;
     current_location: string;
+    current_location_id?: number;
+    current_location_name?: string;
+    current_location_code?: string;
     cv_file_path: string;
     cv_file_name: string;
     passport_file_path: string;
@@ -167,18 +172,18 @@ export default function ApplicationsIndex({
         <PortalLayout>
             <Head title="CVs & Applications" />
 
-            <div className="space-y-6">
+            <div className="space-y-6 w-full max-w-full min-w-0">
                 <PageHeader
                     title="CVs & Applications"
                     description={`${appTotal} applications received · ${cvTotal} manpower profiles created.`}
                     actions={
-                        <div role="tablist" aria-label="View tabs" className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg bg-white p-1 ring-1 ring-line">
+                        <div role="tablist" aria-label="View tabs" className="no-scrollbar flex w-full sm:w-auto gap-1 overflow-x-auto rounded-lg bg-white p-1 ring-1 ring-line">
                             <button
                                 role="tab"
                                 aria-selected={selectedTab === 'applications'}
                                 type="button"
                                 onClick={() => handleTabChange('applications')}
-                                className={`flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-sm font-medium transition-colors duration-150 ease-out ${
+                                className={`flex-1 sm:flex-initial flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 sm:px-3.5 text-xs sm:text-sm font-medium transition-colors duration-150 ease-out ${
                                     selectedTab === 'applications' ? 'bg-brand-800 text-white' : 'text-ink-600 hover:text-ink-900'
                                 }`}
                             >
@@ -192,7 +197,7 @@ export default function ApplicationsIndex({
                                 aria-selected={selectedTab === 'cvs'}
                                 type="button"
                                 onClick={() => handleTabChange('cvs')}
-                                className={`flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3.5 text-sm font-medium transition-colors duration-150 ease-out ${
+                                className={`flex-1 sm:flex-initial flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 sm:px-3.5 text-xs sm:text-sm font-medium transition-colors duration-150 ease-out ${
                                     selectedTab === 'cvs' ? 'bg-brand-800 text-white' : 'text-ink-600 hover:text-ink-900'
                                 }`}
                             >
@@ -207,7 +212,7 @@ export default function ApplicationsIndex({
 
                 {/* -------------------- VIEW A: JOB APPLICATIONS -------------------- */}
                 {selectedTab === 'applications' && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 w-full max-w-full min-w-0">
                         {/* Filter card */}
                         <div className="rounded-2xl border border-line bg-white p-4">
                             <div className="grid gap-3 md:grid-cols-4">
@@ -303,124 +308,294 @@ export default function ApplicationsIndex({
                                 <p className="mt-1 text-sm text-ink-600">Try adjusting your filters or search term.</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-sm">
-                                <table className="w-full min-w-[1100px] text-left text-sm">
-                                    <thead className="border-b border-line bg-surface text-[13px] text-ink-500">
-                                        <tr>
-                                            <th scope="col" className="px-4 py-3 font-medium">Candidate Name</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Passport No.</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Mobile</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Job Title</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Job Code</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Country</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Designation</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Experience</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Overseas</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Location</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Submitted</th>
-                                            <th scope="col" className="px-4 py-3 font-medium">Status</th>
-                                            <th scope="col" className="px-4 py-3 text-right"><span className="sr-only">Actions</span></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-line">
+                            <>
+                                {/* Desktop Table */}
+                                <div className="hidden md:block w-full max-w-full rounded-2xl border border-line bg-white shadow-sm overflow-hidden">
+                                    <div className="overflow-x-auto w-full">
+                                        <table className="w-full text-left text-sm">
+                                            <thead className="border-b border-line bg-surface text-xs text-ink-500 whitespace-nowrap">
+                                                <tr>
+                                                    <th scope="col" className="px-3 py-3 font-medium">Candidate</th>
+                                                    <th scope="col" className="px-3 py-3 font-medium">Applied Job</th>
+                                                    <th scope="col" className="px-2.5 py-3 font-medium">Exp</th>
+                                                    <th scope="col" className="px-2 py-3 font-medium">Location</th>
+                                                    <th scope="col" className="px-2.5 py-3 font-medium">Files</th>
+                                                    <th scope="col" className="px-2.5 py-3 font-medium">Date</th>
+                                                    <th scope="col" className="px-2.5 py-3 font-medium">Status</th>
+                                                    <th scope="col" className="px-2 py-3 text-right"><span className="sr-only">Actions</span></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-line">
+                                                {appList.map((app) => (
+                                                    <tr key={app.id} className="hover:bg-surface/60 transition">
+                                                        <td className="px-3 py-3">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setSelectedApp(app)}
+                                                                className="text-left font-semibold text-ink-900 hover:text-brand-800 block truncate max-w-[150px]"
+                                                                title={app.full_name}
+                                                            >
+                                                                {app.full_name}
+                                                            </button>
+                                                            <span className="text-[11px] text-ink-500 block mt-0.5 whitespace-nowrap">
+                                                                {app.passport_number ? <span className="font-mono text-ink-700">{app.passport_number}</span> : null}
+                                                                {app.passport_number && app.mobile_number ? ' · ' : ''}
+                                                                {app.mobile_number ? <span>{app.mobile_number}</span> : null}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-3 py-3">
+                                                            <div className="max-w-[160px] truncate font-medium text-ink-900" title={app.job_title}>
+                                                                {app.job_title}
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                                <span className="font-mono text-[10px] font-semibold px-1 py-0.2 rounded bg-brand-50 text-brand-800 ring-1 ring-brand-100">
+                                                                    {app.job_code}
+                                                                </span>
+                                                                <span className="text-xs text-ink-500 flex items-center gap-1 truncate max-w-[120px]">
+                                                                    <CountryFlag country={app.country} /> {app.country}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-2.5 py-3 whitespace-nowrap">
+                                                            <span className="font-medium text-ink-900 text-xs block leading-tight">{app.experience_years}</span>
+                                                            <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 text-[9px] font-semibold mt-0.5 ring-1 whitespace-nowrap ${
+                                                                app.has_overseas_experience
+                                                                    ? 'bg-accent-50 text-accent-700 ring-accent-100'
+                                                                    : 'bg-surface text-ink-600 ring-line'
+                                                            }`}>
+                                                                {app.has_overseas_experience ? 'Overseas: Yes' : 'Overseas: No'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-2 py-3 text-xs whitespace-nowrap">
+                                                            <span
+                                                                title={app.current_location_name || getCountryNameByCode(app.current_location)}
+                                                                className={`inline-flex items-center gap-1 font-semibold px-1.5 py-0.5 rounded text-[10px] ring-1 whitespace-nowrap ${
+                                                                    app.current_location_code === 'BD' || app.current_location_name === 'Bangladesh'
+                                                                        ? 'bg-brand-50 text-brand-800 ring-brand-100'
+                                                                        : 'bg-accent-50 text-accent-700 ring-accent-100'
+                                                                }`}
+                                                            >
+                                                                <CountryFlag code={app.current_location_code} country={app.current_location_name} size="sm" />
+                                                                <span>{app.current_location_code || app.current_location_name || app.current_location}</span>
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-2.5 py-3 whitespace-nowrap">
+                                                            <div className="flex items-center gap-1">
+                                                                {app.cv_file_path && (
+                                                                    <a
+                                                                        href={app.cv_file_path}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        className="inline-flex items-center gap-1 rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
+                                                                        title={app.cv_file_name || 'CV Document'}
+                                                                    >
+                                                                        <FileTextIcon className="h-3 w-3" /> CV
+                                                                    </a>
+                                                                )}
+                                                                {app.passport_file_path && (
+                                                                    <a
+                                                                        href={app.passport_file_path}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        className="inline-flex items-center gap-1 rounded bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-ink-700 ring-1 ring-line hover:bg-slate-100"
+                                                                        title={app.passport_file_name || 'Additional Document 1'}
+                                                                    >
+                                                                        Doc 2
+                                                                    </a>
+                                                                )}
+                                                                {app.photo_file_path && (
+                                                                    <a
+                                                                        href={app.photo_file_path}
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                        className="inline-flex items-center gap-1 rounded bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-ink-700 ring-1 ring-line hover:bg-slate-100"
+                                                                        title={app.photo_file_name || 'Additional Document 2'}
+                                                                    >
+                                                                        Doc 3
+                                                                    </a>
+                                                                )}
+                                                                {!app.cv_file_path && !app.passport_file_path && !app.photo_file_path && (
+                                                                    <span className="text-xs text-ink-400">—</span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-2.5 py-3 text-ink-500 text-xs">
+                                                            {formatDate(app.submitted_at)}
+                                                        </td>
+                                                        <td className="px-2.5 py-3 whitespace-nowrap">
+                                                            <StatusBadge status={app.status} />
+                                                        </td>
+                                                        <td className="px-2 py-2 text-right">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <button
+                                                                    type="button"
+                                                                    className={iconButton}
+                                                                    title="View Applicant & Files"
+                                                                    aria-label={`View ${app.full_name}`}
+                                                                    onClick={() => setSelectedApp(app)}
+                                                                >
+                                                                    <EyeIcon className="h-4 w-4" />
+                                                                </button>
+                                                                {app.cv_file_path && (
+                                                                    <a
+                                                                        href={app.cv_file_path}
+                                                                        download
+                                                                        className={iconButton}
+                                                                        title="Download CV file"
+                                                                    >
+                                                                        <DownloadIcon className="h-4 w-4" />
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination for Applications table */}
+                                    <Pagination
+                                        links={appLinks}
+                                        from={appFrom}
+                                        to={appTo}
+                                        total={appTotal}
+                                    />
+                                </div>
+
+                                {/* Mobile Cards (md:hidden - zero horizontal scroll on small screens) */}
+                                <div className="md:hidden space-y-3">
+                                    <ul className="space-y-3">
                                         {appList.map((app) => (
-                                            <tr key={app.id} className="hover:bg-surface/60 transition">
-                                                <td className="px-4 py-3.5">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setSelectedApp(app)}
-                                                        className="text-left font-medium text-ink-900 hover:text-brand-800"
-                                                    >
-                                                        {app.full_name}
-                                                    </button>
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-3.5 font-mono text-ink-700">
-                                                    {app.passport_number}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-3.5 text-ink-700 font-mono text-xs">
-                                                    {app.mobile_number}
-                                                </td>
-                                                <td className="max-w-[200px] truncate px-4 py-3.5 text-ink-900" title={app.job_title}>
-                                                    {app.job_title}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-3.5">
-                                                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-brand-50 text-brand-800 ring-1 ring-brand-100">
-                                                        {app.job_code}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3.5">
-                                                    <span className="flex items-center gap-2 whitespace-nowrap text-ink-700">
-                                                        <CountryFlag country={app.country} /> {app.country}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3.5 text-ink-700">{app.designation}</td>
-                                                <td className="px-4 py-3.5 font-medium text-ink-900">{app.experience_years}</td>
-                                                <td className="px-4 py-3.5">
-                                                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ${
-                                                        app.has_overseas_experience
-                                                            ? 'bg-accent-50 text-accent-700 ring-accent-100'
-                                                            : 'bg-surface text-ink-600 ring-line'
-                                                    }`}>
-                                                        {app.has_overseas_experience ? 'Yes' : 'No'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3.5 text-ink-600">{app.current_location}</td>
-                                                <td className="whitespace-nowrap px-4 py-3.5 text-ink-500 text-xs">
-                                                    {formatDate(app.submitted_at)}
-                                                </td>
-                                                <td className="px-4 py-3.5">
-                                                    <StatusBadge status={app.status} />
-                                                </td>
-                                                <td className="px-2 py-2 text-right">
-                                                    <div className="flex items-center justify-end gap-1">
+                                            <li key={app.id} className="rounded-2xl border border-line bg-white p-4 shadow-sm">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedApp(app)}
+                                                    className="block w-full text-left"
+                                                >
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="min-w-0">
+                                                            <p className="font-bold text-ink-900 text-base truncate">{app.full_name}</p>
+                                                            <p className="text-xs text-ink-500 font-mono mt-0.5 truncate">
+                                                                {app.passport_number || 'No Passport'} · {app.mobile_number}
+                                                            </p>
+                                                        </div>
+                                                        <StatusBadge status={app.status} />
+                                                    </div>
+
+                                                    <div className="mt-2.5 pt-2 border-t border-line/60">
+                                                        <p className="font-medium text-sm text-ink-900">{app.job_title}</p>
+                                                        <div className="flex items-center gap-2 mt-1 text-xs text-ink-500">
+                                                            <span className="font-mono font-semibold px-1.5 py-0.5 rounded bg-brand-50 text-brand-800 ring-1 ring-brand-100">
+                                                                {app.job_code}
+                                                            </span>
+                                                            <span className="flex items-center gap-1 text-ink-700">
+                                                                <CountryFlag country={app.country} /> {app.country}
+                                                            </span>
+                                                            <span>· {app.designation}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-2 flex items-center justify-between text-xs text-ink-500">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span>Exp: <strong className="text-ink-800">{app.experience_years}</strong> {app.has_overseas_experience ? '(Overseas)' : ''}</span>
+                                                            <span
+                                                                title={app.current_location_name || getCountryNameByCode(app.current_location)}
+                                                                className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-[10px] ring-1 whitespace-nowrap ${
+                                                                    app.current_location_code === 'BD' || app.current_location_name === 'Bangladesh'
+                                                                        ? 'bg-brand-50 text-brand-800 ring-brand-100'
+                                                                        : 'bg-accent-50 text-accent-700 ring-accent-100'
+                                                                }`}
+                                                            >
+                                                                <CountryFlag code={app.current_location_code} country={app.current_location_name} size="sm" />
+                                                                <span>{app.current_location_code || app.current_location_name || app.current_location}</span>
+                                                            </span>
+                                                        </div>
+                                                        <span>{formatDate(app.submitted_at)}</span>
+                                                    </div>
+                                                </button>
+
+                                                <div className="mt-3 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                                        {app.cv_file_path && (
+                                                            <a
+                                                                href={app.cv_file_path}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="inline-flex items-center gap-1 rounded bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-800 ring-1 ring-brand-200 hover:bg-brand-100"
+                                                            >
+                                                                <FileTextIcon className="h-3 w-3" /> CV
+                                                            </a>
+                                                        )}
+                                                        {app.passport_file_path && (
+                                                            <a
+                                                                href={app.passport_file_path}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="inline-flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[11px] font-semibold text-ink-700 ring-1 ring-line hover:bg-slate-100"
+                                                                title={app.passport_file_name || 'Additional Document 1'}
+                                                            >
+                                                                Doc 2
+                                                            </a>
+                                                        )}
+                                                        {app.photo_file_path && (
+                                                            <a
+                                                                href={app.photo_file_path}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="inline-flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[11px] font-semibold text-ink-700 ring-1 ring-line hover:bg-slate-100"
+                                                                title={app.photo_file_name || 'Additional Document 2'}
+                                                            >
+                                                                Doc 3
+                                                            </a>
+                                                        )}
+                                                        {!app.cv_file_path && !app.passport_file_path && !app.photo_file_path && (
+                                                            <span className="text-xs text-ink-400">No files</span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1">
                                                         <button
                                                             type="button"
-                                                            className={iconButton}
-                                                            title="View Applicant & Files"
-                                                            aria-label={`View ${app.full_name}`}
                                                             onClick={() => setSelectedApp(app)}
+                                                            className={`${buttonSmSecondary} text-xs h-8 px-3`}
                                                         >
-                                                            <EyeIcon className="h-4 w-4" />
+                                                            <EyeIcon className="h-3.5 w-3.5" /> View Details
                                                         </button>
-                                                        <a
-                                                            href={app.cv_file_path}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className={iconButton}
-                                                            title="Open CV file"
-                                                        >
-                                                            <ExternalLinkIcon className="h-4 w-4" />
-                                                        </a>
-                                                        <a
-                                                            href={app.cv_file_path}
-                                                            download
-                                                            className={iconButton}
-                                                            title="Download CV file"
-                                                        >
-                                                            <DownloadIcon className="h-4 w-4" />
-                                                        </a>
+                                                        {app.cv_file_path && (
+                                                            <a
+                                                                href={app.cv_file_path}
+                                                                download
+                                                                className={iconButton}
+                                                                title="Download CV"
+                                                            >
+                                                                <DownloadIcon className="h-4 w-4" />
+                                                            </a>
+                                                        )}
                                                     </div>
-                                                </td>
-                                            </tr>
+                                                </div>
+                                            </li>
                                         ))}
-                                    </tbody>
-                                </table>
+                                    </ul>
 
-                                {/* Pagination for Applications table */}
-                                <Pagination
-                                    links={appLinks}
-                                    from={appFrom}
-                                    to={appTo}
-                                    total={appTotal}
-                                />
-                            </div>
+                                    {/* Mobile Pagination */}
+                                    <div className="rounded-2xl border border-line bg-white shadow-sm overflow-hidden">
+                                        <Pagination
+                                            links={appLinks}
+                                            from={appFrom}
+                                            to={appTo}
+                                            total={appTotal}
+                                        />
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 )}
 
                 {/* -------------------- VIEW B: CREATED CVS (MANPOWER PROFILE MANAGER) -------------------- */}
                 {selectedTab === 'cvs' && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 w-full max-w-full min-w-0">
                         <div className="rounded-2xl border border-line bg-white p-4">
                             <div className="relative max-w-md">
                                 <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" aria-hidden />
@@ -446,7 +621,7 @@ export default function ApplicationsIndex({
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     {cvList.map((cv) => (
                                         <div
                                             key={cv.id}
@@ -525,20 +700,34 @@ export default function ApplicationsIndex({
                                                 )}
                                             </div>
 
-                                            <div className="pt-4 mt-3 border-t border-line flex items-center justify-between gap-2">
+                                            <div className="pt-4 mt-3 border-t border-line grid grid-cols-3 gap-1.5">
                                                 <a
                                                     href={`/portal/cvs/${cv.id}/export`}
                                                     target="_blank"
                                                     rel="noreferrer"
-                                                    className={buttonSmSecondary}
+                                                    className={`${buttonSmSecondary} text-xs px-1.5 justify-center`}
+                                                    title="View & Print CV"
                                                 >
-                                                    <PrinterIcon className="h-3.5 w-3.5" /> Print Manpower CV
+                                                    <PrinterIcon className="h-3.5 w-3.5 shrink-0" />
+                                                    <span className="truncate">Print</span>
+                                                </a>
+                                                <a
+                                                    href={`/portal/cvs/${cv.id}/export?download=1`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className={`${buttonSmSecondary} text-xs px-1.5 justify-center text-brand-800 hover:text-brand-900`}
+                                                    title="Download CV as PDF"
+                                                >
+                                                    <DownloadIcon className="h-3.5 w-3.5 shrink-0" />
+                                                    <span className="truncate">Download</span>
                                                 </a>
                                                 <Link
                                                     href={`/portal/cvs/${cv.id}/edit`}
-                                                    className={buttonSmPrimary}
+                                                    className={`${buttonSmPrimary} text-xs px-1.5 justify-center`}
+                                                    title="Edit CV Profile"
                                                 >
-                                                    <Edit3Icon className="h-3.5 w-3.5" /> Edit Profile
+                                                    <Edit3Icon className="h-3.5 w-3.5 shrink-0" />
+                                                    <span className="truncate">Edit</span>
                                                 </Link>
                                             </div>
                                         </div>

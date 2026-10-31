@@ -17,6 +17,7 @@ import {
 import { CountryFlag } from './CountryFlag';
 import { StatusBadge } from './StatusBadge';
 import { formatDateTime, initials } from '../utils/format';
+import { getCountryNameByCode } from '../utils/isoCountries';
 import { buttonSmPrimary, buttonSmSecondary, iconButton } from '../utils/styles';
 
 interface ApplicationItem {
@@ -33,6 +34,9 @@ interface ApplicationItem {
     experience_years: string;
     has_overseas_experience: boolean;
     current_location: string;
+    current_location_id?: number;
+    current_location_name?: string;
+    current_location_code?: string;
     cv_file_path: string;
     cv_file_name: string;
     passport_file_path: string;
@@ -118,18 +122,7 @@ export function ApplicantDrawer({ application, onClose }: ApplicantDrawerProps) 
                             <span className="text-xs font-medium text-ink-500">Review Status</span>
                             <StatusBadge status={application.status} />
                         </div>
-                        <div className="mt-3 grid grid-cols-3 gap-2">
-                            <button
-                                type="button"
-                                onClick={() => handleStatusChange('Selected')}
-                                className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
-                                    application.status === 'Selected'
-                                        ? 'bg-accent-600 text-white shadow-sm'
-                                        : 'bg-white text-accent-700 ring-1 ring-accent-200 hover:bg-accent-50'
-                                }`}
-                            >
-                                <CheckCircleIcon className="h-3.5 w-3.5" /> Select
-                            </button>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
                             <button
                                 type="button"
                                 onClick={() => handleStatusChange('Pending')}
@@ -143,14 +136,14 @@ export function ApplicantDrawer({ application, onClose }: ApplicantDrawerProps) 
                             </button>
                             <button
                                 type="button"
-                                onClick={() => handleStatusChange('Rejected')}
+                                onClick={() => handleStatusChange('Approved')}
                                 className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition ${
-                                    application.status === 'Rejected'
-                                        ? 'bg-danger-600 text-white shadow-sm'
-                                        : 'bg-white text-danger-700 ring-1 ring-danger-200 hover:bg-danger-50'
+                                    application.status === 'Approved' || application.status === 'Selected'
+                                        ? 'bg-accent-600 text-white shadow-sm'
+                                        : 'bg-white text-accent-700 ring-1 ring-accent-200 hover:bg-accent-50'
                                 }`}
                             >
-                                <XCircleIcon className="h-3.5 w-3.5" /> Reject
+                                <CheckCircleIcon className="h-3.5 w-3.5" /> Approved
                             </button>
                         </div>
                     </div>
@@ -174,7 +167,13 @@ export function ApplicantDrawer({ application, onClose }: ApplicantDrawerProps) 
                         </li>
                         <li className="flex items-center gap-3">
                             <MapPinIcon className="h-4 w-4 text-ink-400 shrink-0" aria-hidden />
-                            <span className="text-ink-700">{application.current_location}</span>
+                            <span className="text-ink-700 flex items-center gap-1.5">
+                                Location: <CountryFlag code={application.current_location_code || application.current_location} />
+                                <span className="font-semibold text-ink-900">
+                                    {application.current_location_name || getCountryNameByCode(application.current_location)}
+                                    {application.current_location_code ? ` (${application.current_location_code})` : ''}
+                                </span>
+                            </span>
                         </li>
                     </ul>
 
@@ -214,7 +213,13 @@ export function ApplicantDrawer({ application, onClose }: ApplicantDrawerProps) 
                                 </div>
                                 <div>
                                     <dt className="text-ink-500 text-xs">Current Location</dt>
-                                    <dd className="mt-0.5 font-medium text-ink-900">{application.current_location}</dd>
+                                    <dd className="mt-0.5 flex items-center gap-1.5 font-medium text-ink-900">
+                                        <CountryFlag code={application.current_location_code || application.current_location} />
+                                        <span>
+                                            {application.current_location_name || getCountryNameByCode(application.current_location)}
+                                            {application.current_location_code ? ` (${application.current_location_code})` : ''}
+                                        </span>
+                                    </dd>
                                 </div>
                             </dl>
                             <a
@@ -264,65 +269,69 @@ export function ApplicantDrawer({ application, onClose }: ApplicantDrawerProps) 
                                 </div>
                             </div>
 
-                            {/* Passport copy */}
-                            <div className="flex items-center justify-between rounded-xl border border-line p-3 hover:border-brand-200 transition">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <ShieldIcon className="h-6 w-6 shrink-0 text-accent-700" aria-hidden />
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-medium text-ink-900">2. Passport Copy Scan</p>
-                                        <p className="text-xs text-ink-500 truncate">{application.passport_file_name}</p>
+                            {/* Additional Document 1 */}
+                            {application.passport_file_path ? (
+                                <div className="flex items-center justify-between rounded-xl border border-line p-3 hover:border-brand-200 transition">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <FileTextIcon className="h-6 w-6 shrink-0 text-ink-600" aria-hidden />
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium text-ink-900">2. Additional Document 1</p>
+                                            <p className="text-xs text-ink-500 truncate">{application.passport_file_name || 'Document File'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <a
+                                            href={application.passport_file_path}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className={iconButton}
+                                            title="Open document"
+                                        >
+                                            <ExternalLinkIcon className="h-4 w-4" />
+                                        </a>
+                                        <a
+                                            href={application.passport_file_path}
+                                            download
+                                            className={iconButton}
+                                            title="Download document"
+                                        >
+                                            <DownloadIcon className="h-4 w-4" />
+                                        </a>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <a
-                                        href={application.passport_file_path}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className={iconButton}
-                                        title="Open passport scan"
-                                    >
-                                        <ExternalLinkIcon className="h-4 w-4" />
-                                    </a>
-                                    <a
-                                        href={application.passport_file_path}
-                                        download
-                                        className={iconButton}
-                                        title="Download passport scan"
-                                    >
-                                        <DownloadIcon className="h-4 w-4" />
-                                    </a>
-                                </div>
-                            </div>
+                            ) : null}
 
-                            {/* Photo */}
-                            <div className="flex items-center justify-between rounded-xl border border-line p-3 hover:border-brand-200 transition">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <ImageIcon className="h-6 w-6 shrink-0 text-brand-600" aria-hidden />
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-medium text-ink-900">3. Candidate Photo</p>
-                                        <p className="text-xs text-ink-500 truncate">{application.photo_file_name}</p>
+                            {/* Additional Document 2 */}
+                            {application.photo_file_path ? (
+                                <div className="flex items-center justify-between rounded-xl border border-line p-3 hover:border-brand-200 transition">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <FileTextIcon className="h-6 w-6 shrink-0 text-ink-600" aria-hidden />
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium text-ink-900">3. Additional Document 2</p>
+                                            <p className="text-xs text-ink-500 truncate">{application.photo_file_name || 'Document File'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <a
+                                            href={application.photo_file_path}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className={iconButton}
+                                            title="Open document"
+                                        >
+                                            <ExternalLinkIcon className="h-4 w-4" />
+                                        </a>
+                                        <a
+                                            href={application.photo_file_path}
+                                            download
+                                            className={iconButton}
+                                            title="Download document"
+                                        >
+                                            <DownloadIcon className="h-4 w-4" />
+                                        </a>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <a
-                                        href={application.photo_file_path}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className={iconButton}
-                                        title="Open photo"
-                                    >
-                                        <ExternalLinkIcon className="h-4 w-4" />
-                                    </a>
-                                    <a
-                                        href={application.photo_file_path}
-                                        download
-                                        className={iconButton}
-                                        title="Download photo"
-                                    >
-                                        <DownloadIcon className="h-4 w-4" />
-                                    </a>
-                                </div>
-                            </div>
+                            ) : null}
                         </div>
                     </section>
                 </div>
