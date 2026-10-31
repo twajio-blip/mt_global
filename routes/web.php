@@ -1,74 +1,60 @@
 <?php
 
-use App\Models\Page;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\Candidate\CandidateCvController;
+use App\Http\Controllers\Portal\ApplicationCvController;
+use App\Http\Controllers\Portal\DashboardController;
+use App\Http\Controllers\Portal\JobController;
+use App\Http\Controllers\Portal\SetupController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\Frontend\PageController;
-use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Public\PublicJobController;
+use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+// Public Candidate Flow
+Route::get('/', [PublicJobController::class, 'index'])->name('home');
+Route::get('/jobs', [PublicJobController::class, 'index'])->name('jobs.index');
+Route::get('/jobs/{job}', [PublicJobController::class, 'show'])->name('jobs.show');
+Route::post('/jobs/{job}/apply', [PublicJobController::class, 'apply'])->name('jobs.apply');
 
-Route::middleware(['visitor'])->group(function () {
-
-    if (Schema::hasColumn('pages', 'permalink')) {
-        $page = Page::pluck('permalink');
-    } else {
-
-        $page = [];
-    }
-    foreach ($page as $key => $url) {
-        Route::get($url, [PageController::class, 'index']);
-
-    }
-    Route::get('data-view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'dataView'])->name('data-view');
-
-    if (count($page) == 0) {
-        Route::get('/', [PageController::class, 'defaultPage']);
-    }
-    Route::get('service-view/{id}', [PageController::class, 'serviceView'])->name('service-view');
-    Route::get('blog/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'blogView'])->name('blog.view');
-    Route::get('list/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'listView'])->name('list.view');
-    Route::get('news/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'blogView'])->name('article.view');
-    Route::get('job/view/{id}/current_page_id/{current_page_id?}', [PageController::class, 'jobView'])->name('job.view');
-    Route::post('job/{job}/apply', [PageController::class, 'jobApply'])->name('job.apply');
-    Route::get('gallery/view/{id}', [PageController::class, 'galleryView'])->name('gallery.view');
-
-    Route::post('contact/store', [PageController::class, 'contactStore'])->name('contact.store.frontend');
-    Route::post('subscriber/store', [PageController::class, 'subscriberStore'])->name('subscriber.store.frontend');
-    Route::post('/switch-language', [LanguageController::class, 'switch_language'])->name('switch_language');
-    Route::get('view/page_id/{page_id?}/group/{group?}/component/{component_id?}/current_page_id/{current_page_id?}/view_page_name/{view_page_name?}', [PageController::class, 'pageDetails'])->name('page.details.view');
-
-
+// Candidate Manpower CV
+Route::middleware(['auth'])->group(function () {
+    Route::get('/my-cv', [CandidateCvController::class, 'show'])->name('candidate.cv.show');
+    Route::post('/my-cv', [CandidateCvController::class, 'update'])->name('candidate.cv.update');
 });
 
+// Portal / Admin Flow
+Route::prefix('portal')->name('portal.')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('root');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('admin/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
+    // Dual-System: Applications / CVs Module
+    Route::get('/applications', [ApplicationCvController::class, 'index'])->name('applications.index');
+    Route::patch('/applications/{application}/status', [ApplicationCvController::class, 'updateApplicationStatus'])->name('applications.status');
+    Route::get('/cvs/{cvProfile}/edit', [ApplicationCvController::class, 'editCv'])->name('cvs.edit');
+    Route::post('/cvs/{cvProfile}', [ApplicationCvController::class, 'updateCv'])->name('cvs.update');
+    Route::get('/cvs/{cvProfile}/export', [ApplicationCvController::class, 'exportCv'])->name('cvs.export');
 
-// Clear all optimization caches (config, route, view, cache) – auth required
-Route::get('optimize-clear', function () {
-    Artisan::call('optimize:clear');
-    return response()->json([
-        'message' => 'Optimization caches cleared.',
-        'output' => trim(Artisan::output()),
-    ]);
-})->name('optimize.clear');
+    // Job Creation Engine
+    Route::resource('jobs', JobController::class)->except(['show']);
+    Route::patch('/jobs/{job}/status', [JobController::class, 'updateStatus'])->name('jobs.status');
 
+    // Setup Modules
+    Route::get('/setup/countries', [SetupController::class, 'countries'])->name('setup.countries');
+    Route::post('/setup/countries', [SetupController::class, 'storeCountry'])->name('setup.countries.store');
+    Route::put('/setup/countries/{country}', [SetupController::class, 'updateCountry'])->name('setup.countries.update');
+    Route::patch('/setup/countries/{country}/toggle', [SetupController::class, 'toggleCountry'])->name('setup.countries.toggle');
 
+    Route::get('/setup/designations', [SetupController::class, 'designations'])->name('setup.designations');
+    Route::post('/setup/designations', [SetupController::class, 'storeDesignation'])->name('setup.designations.store');
+    Route::put('/setup/designations/{designation}', [SetupController::class, 'updateDesignation'])->name('setup.designations.update');
+    Route::patch('/setup/designations/{designation}/toggle', [SetupController::class, 'toggleDesignation'])->name('setup.designations.toggle');
+});
 
+// Auth & Breeze Routes
+Route::redirect('/dashboard', '/portal/dashboard')->name('dashboard');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-
-
-require __DIR__ . '/auth.php';
-require __DIR__ . '/admin.php';
+require __DIR__.'/auth.php';
