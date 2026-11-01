@@ -1,0 +1,553 @@
+{
+	"info": {
+		"_postman_id": "8f42e3b1-9c71-4a3e-b816-1f92e4a60001",
+		"name": "Job Portal & Manpower Recruitment API",
+		"description": "Authenticated REST API collection for connecting website builders (WordPress, Webflow, Wix, custom frontends) to the Job Portal & Manpower CV Management System.\n\nAll data endpoints are protected with API Key / Token Authentication via header 'X-API-KEY' or 'Authorization: Bearer <key>'.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "X-API-KEY",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{apiKey}}",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000",
+			"type": "string",
+			"description": "Base URL of the Laravel Application (e.g. http://127.0.0.1:8000 or your live domain)"
+		},
+		{
+			"key": "apiKey",
+			"value": "jp_live_sec_99a8b7c6d5e4f3a2b1c0",
+			"type": "string",
+			"description": "Secret API Key configured in your application .env (JOB_PORTAL_API_KEY)"
+		},
+		{
+			"key": "sampleJobCode",
+			"value": "KSA-2026-001",
+			"type": "string",
+			"description": "Sample Job Code or Numeric ID for testing single job requests"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Admin Single Sign-On (SSO)",
+			"description": "Endpoints enabling the website builder to seamlessly log the admin into the Job Portal dashboard without requiring them to enter a password.",
+			"item": [
+				{
+					"name": "Generate Admin SSO Token (Single-Use URL)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@jobportal.com\",\n    \"redirect_to\": \"/portal/dashboard\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/sso/token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sso",
+								"token"
+							]
+						},
+						"description": "Backend API call executed by the website builder using the API Key. Returns a single-use SSO URL ('sso_url') valid for 5 minutes. The website builder then redirects the admin browser to this URL to log them in automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Consume SSO Token (Browser Redirect)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/portal/sso?token=sso_sample_token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"portal",
+								"sso"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "sso_sample_token"
+								}
+							]
+						},
+						"description": "The browser hits this URL with the token generated from /api/v1/sso/token. Validates the token, signs in the admin user into a secure session, and redirects straight to /portal/dashboard."
+					},
+					"response": []
+				},
+				{
+					"name": "Direct 1-Click SSO Link (Using API Key)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/portal/sso?key={{apiKey}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"portal",
+								"sso"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{apiKey}}"
+								}
+							]
+						},
+						"description": "Direct 1-click link that can be placed in the website builder admin menu. Validates the API key query parameter, logs the admin in, and lands on /portal/dashboard."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Authentication",
+			"description": "API login endpoint to retrieve the API key and authenticated user details.",
+			"item": [
+				{
+					"name": "Login (Get API Key & User Info)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.api_key) {",
+									"    pm.collectionVariables.set('apiKey', jsonData.data.api_key);",
+									"    console.log('API Key updated:', jsonData.data.api_key);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@jobportal.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate using email & password. Automatically stores the returned API Key into the Postman collection variable 'apiKey'."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Metadata & Dropdowns",
+			"description": "Endpoints to populate country, designation, and filter dropdowns in the website builder.",
+			"item": [
+				{
+					"name": "Get Active Countries",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/countries",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"countries"
+							]
+						},
+						"description": "Returns list of active countries with id, name, ISO code, and flag emoji. Requires X-API-KEY header."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Designations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/designations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"designations"
+							]
+						},
+						"description": "Returns list of active job categories / designations. Requires X-API-KEY header."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Company Details & QR",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/company",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"company"
+							]
+						},
+						"description": "Returns company profile: name, email, phone, address, website, logo URL, and official QR code image URL. Requires X-API-KEY header."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Jobs Discovery",
+			"description": "Endpoints to search, filter, paginate, and view published manpower job listings.",
+			"item": [
+				{
+					"name": "List All Published Jobs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs?page=1&per_page=12",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Current page number"
+								},
+								{
+									"key": "per_page",
+									"value": "12",
+									"description": "Number of jobs per page (max 100)"
+								}
+							]
+						},
+						"description": "Fetches paginated list of published jobs. Requires X-API-KEY header."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Jobs by Keyword",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs?search=Electrician",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Electrician",
+									"description": "Search keyword matching title, job code, or employer"
+								}
+							]
+						},
+						"description": "Searches published jobs by English/Bangla title, job code, or employer."
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Jobs by Country",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs?country=Saudi Arabia",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "country",
+									"value": "Saudi Arabia",
+									"description": "Country name, ISO code (e.g. SA), or country ID"
+								}
+							]
+						},
+						"description": "Filters jobs by country name, ISO code, or country_id."
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Jobs by Designation",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs?designation=Lineman",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "designation",
+									"value": "Lineman",
+									"description": "Designation name or designation ID"
+								}
+							]
+						},
+						"description": "Filters jobs by designation name or designation_id."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Job Details (by Job Code or ID)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs/{{sampleJobCode}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs",
+								"{{sampleJobCode}}"
+							]
+						},
+						"description": "Fetches complete job details by Job Code (e.g. KSA-2026-001) or Numeric ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Candidate Applications (Quick Apply)",
+			"description": "Endpoints for submitting candidate job applications with file attachments.",
+			"item": [
+				{
+					"name": "Submit Job Application (Multipart Upload)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "full_name",
+									"value": "Md Sumon Ali",
+									"type": "text",
+									"description": "Candidate full name (Required)"
+								},
+								{
+									"key": "passport_number",
+									"value": "B00788472",
+									"type": "text",
+									"description": "Passport number - unique candidate identifier (Required)"
+								},
+								{
+									"key": "mobile_number",
+									"value": "01712345678",
+									"type": "text",
+									"description": "Candidate mobile / WhatsApp number (Required)"
+								},
+								{
+									"key": "experience_years",
+									"value": "4 Years",
+									"type": "text",
+									"description": "Candidate total years of experience (Required)"
+								},
+								{
+									"key": "has_overseas_experience",
+									"value": "true",
+									"type": "text",
+									"description": "true / false / 1 / 0 (Required)"
+								},
+								{
+									"key": "current_location",
+									"value": "1",
+									"type": "text",
+									"description": "Country ID from /countries (e.g. 1) or ISO code like BD (Required)"
+								},
+								{
+									"key": "cv_file",
+									"type": "file",
+									"src": [],
+									"description": "Curriculum Vitae file: PDF, DOC, DOCX, JPG, PNG up to 5MB (Required)"
+								},
+								{
+									"key": "passport_file",
+									"type": "file",
+									"src": [],
+									"description": "Passport scan / photo up to 5MB (Optional)"
+								},
+								{
+									"key": "photo_file",
+									"type": "file",
+									"src": [],
+									"description": "Candidate photo up to 5MB (Optional)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs/{{sampleJobCode}}/apply",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs",
+								"{{sampleJobCode}}",
+								"apply"
+							]
+						},
+						"description": "Submits a new job application. Requires X-API-KEY header."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
